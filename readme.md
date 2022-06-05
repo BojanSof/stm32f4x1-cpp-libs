@@ -1,4 +1,4 @@
-# Embedded systems design and programming based on STM32 MCU
+# Embedded systems design and programming using STM32 MCU
 
 ## Learning roadmap
 
