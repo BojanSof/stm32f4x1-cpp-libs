@@ -1,4 +1,4 @@
-# STM32 CMake template
+# Embedded systems design and programming based on STM32 MCU
 
 ## Learning roadmap
 
