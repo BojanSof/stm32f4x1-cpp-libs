@@ -14,3 +14,4 @@
   - Cortex-M instruction set overview
   - Programmer's model
   - Really good one and compact (28 pages)
+  - Included in the resources folder
