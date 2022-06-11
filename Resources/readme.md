@@ -12,7 +12,8 @@ Each folder contains markdown document providing links to a specific resource an
 
 ### STM32
 
-  TODO
+  - STM32 family overview
+  - STM32F4 detailed overview
 
 ### C_CPP
 
