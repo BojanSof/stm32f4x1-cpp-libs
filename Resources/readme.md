@@ -18,6 +18,6 @@ Each folder contains markdown document providing links to a specific resource an
 ### C_CPP
 
   - Build process
-  - (TODO) Build systems
-  - (TODO) Makefiles
-  - (TODO) CMake
+  - Makefiles
+  - CMake
+  - C++
