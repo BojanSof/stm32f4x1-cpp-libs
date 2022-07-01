@@ -2,7 +2,16 @@
 
 ## Learning roadmap
 
-1. Setup envionment and build system
+1. ARM overview
+
+2. STM32 overview
+    - Products overview.
+    - Naming convention.
+    - F4 family overview (our MCU's family).
+    - ST-Link
+    - ST-Link vs J-link
+
+3. Setup envionment and build system
     - Install cross-compiler and other tools for ARM (also known as toolchain, including `arm-none-eabi-gcc, arm-none-eabi-gdb, arm-none-eabi-newlib`)
       - What is cross-compiler?
       - Why is it needed?
@@ -21,30 +30,21 @@
       - `CMake Tools` by Microsoft for CMake integration in VS Code. 
       - `PlantUML` for drawing UML diagrams, useful for software design planning.
 
-2. STM32 overview
-    - Products overview.
-    - Naming convention.
-    - F4 family overview (our MCU's family).
-    - ST-Link
-    - ST-Link vs J-link
-
-3. C/C++ and Git refresh
-    - TODO
+4. C/C++ and Git refresh
     - Only basic stuff
     - C++ advantages over C (price is greater conceptual complexity)
     - [Compiler Explorer](https://godbolt.org/), why is it useful, how and when to use it.
 
-4. Writing simple `Makefile`s
+5. Writing simple `Makefile`s
 
-5. `CMake` introduction
+6. `CMake` introduction
     - Writing simple `CMakeLists.txt`
     - How to use `CMake` from terminal.
     - How to use it in VS Code.
-    - TODO: Add more detailed map here...
 
-6. Setup STM32 CMake project template
+7. Setup STM32 CMake project template
 
-7. MCU 'Hello World' using the project template
+8. MCU 'Hello World' using the project template
     - Explain the build process:
       - Compiling
       - Linking
@@ -52,6 +52,3 @@
     - Explain MCU target debugging
 
 More to come...
-
-## TODO:
-  - Find resources for every topic
