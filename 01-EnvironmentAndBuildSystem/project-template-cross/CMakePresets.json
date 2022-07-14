@@ -1,0 +1,49 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "STM32-template",
+            "description": "Target STM32-template embedded.",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "architecture": {
+            "value": "arm64",
+            "strategy": "external"
+            },
+            "toolset": {
+            "value": "host=x64",
+            "strategy": "external"
+            },
+            "cacheVariables": {
+            "CMAKE_TOOLCHAIN_FILE": {
+                "value": "${sourceDir}/cmake/stm32_gcc.cmake",
+                "type": "FILEPATH"
+            }
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+          "name": "build-debug",
+          "configurePreset": "STM32-template",
+          "inheritConfigureEnvironment": true,
+          "configuration": "Debug"
+        },
+        {
+          "name": "build-release",
+          "configurePreset": "STM32-template",
+          "inheritConfigureEnvironment": true,
+          "configuration": "Release"
+        },
+        {
+          "name": "build-clean-release",
+          "inherits": "build-release",
+          "cleanFirst": true
+        }
+    ]
+}
