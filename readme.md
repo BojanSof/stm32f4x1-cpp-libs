@@ -51,7 +51,7 @@
     - Explain flashing process
     - Explain MCU target debugging
 
-9. STM32 GPIO interface
+9. STM32F401 GPIO interface
   - Write C++ optimized GPIO interface
     - Do as much as possible in compile-time
     - Ideally, the C++ interface should bring 0 runtime overhead
@@ -62,3 +62,17 @@
     - Writing to pin
     - Reading from pin
   - `constexpr` keyword
+
+10. STM32F401 Timer interface
+  - Allows to easy specify overflow time, in time units
+  - Capture/Compare modes
+  - PWM generation
+  - Interrupts and callbacks
+
+11. Piano toy using STM32F401
+  - Use the timer and GPIO interfaces
+  - DAC using PWM
+  - Multiple voices/channels
+  - DDS approach
+  - Small breakout board with the buttons and the speaker
+  - [OPTIONAL] LEDs for each button and memory-like game
