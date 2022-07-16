@@ -51,4 +51,14 @@
     - Explain flashing process
     - Explain MCU target debugging
 
-More to come...
+9. STM32 GPIO interface
+  - Write C++ optimized GPIO interface
+    - Do as much as possible in compile-time
+    - Ideally, the C++ interface should bring 0 runtime overhead
+  - Provides needed functionalities, like:
+    - Easy to use Port notation, i.e. with `enum class`
+    - Easy to use Pin notation
+    - Setting pin mode, i.e. output, input, etc
+    - Writing to pin
+    - Reading from pin
+  - `constexpr` keyword

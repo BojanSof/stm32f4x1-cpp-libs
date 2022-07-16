@@ -35,6 +35,14 @@
   - Can be hard to read.
   - Also contains C language reference.
 
+4. [Practical Guide to Bare Metal C++](https://arobenko.github.io/bare_metal_cpp/)
+  - Requires C++ experience
+  - What features from C++ NOT to use on bare metal platforms
+  - Interesting and practical examples
+
+5. [C++ on bare metal](https://jeelabs.org/202x/jeeh/bare/)
+  - Another short article for C++ for bare metal platforms
+
 ## Online tools
 
 1. [Compiler explorer](https://godbolt.org/)
