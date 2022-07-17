@@ -4,12 +4,13 @@
       {
           "type": "cortex-debug",
           "request": "launch",
-          "servertype": "stutil",
+          "servertype": "stlink",
           "cwd": "${workspaceRoot}",
           "executable": "${workspaceRoot}/build/STM32-template/src/Debug/stm32f4-blink.elf",
           "name": "STM32-template",
           "device": "STM32F401CC",
           "v1": false,
+          "interface": "swd",
           "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
           "runToEntryPoint": "main"
       }
