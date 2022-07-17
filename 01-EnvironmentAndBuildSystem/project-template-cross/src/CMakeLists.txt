@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/stm32_gcc.cmake)
-
 # fetch CMSIS and HAL
 stm32_fetch_cmsis(F4)
 #stm32_fetch_hal(F4)
@@ -26,3 +24,6 @@ target_link_libraries(stm32f4-blink
 
 stm32_print_size_of_target(stm32f4-blink)
 stm32_generate_binary_file(stm32f4-blink)
+
+# add flash target
+include(${PROJECT_SOURCE_DIR}/cmake/stm32/stlink.cmake)
