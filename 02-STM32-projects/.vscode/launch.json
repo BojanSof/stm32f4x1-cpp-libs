@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Blink First Example",
+          "type": "cortex-debug",
+          "request": "launch",
+          "servertype": "stlink",
+          "cwd": "${workspaceRoot}",
+          "executable": "${workspaceRoot}/build/STM32-projects/src/blink-first-example/Debug/blink-first-example.elf",
+          "device": "STM32F401CC",
+          "v1": false,
+          "interface": "swd",
+          "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+          "runToEntryPoint": "main"
+      },
+      {
+        "name": "Blink GPIO interface",
+        "type": "cortex-debug",
+        "request": "launch",
+        "servertype": "stlink",
+        "cwd": "${workspaceRoot}",
+        "executable": "${workspaceRoot}/build/STM32-projects/src/blink-gpio-interface/Debug/blink-gpio-interface.elf",
+        "device": "STM32F401CC",
+        "v1": false,
+        "interface": "swd",
+        "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+        "runToEntryPoint": "main"
+    }
+  ]
+}
