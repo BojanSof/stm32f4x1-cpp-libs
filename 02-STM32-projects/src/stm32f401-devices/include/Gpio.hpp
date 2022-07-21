@@ -100,7 +100,7 @@ template <Port port, uint8_t pin> class Gpio
       gpioInstance_->BSRR = 1 << (pin + (lvl ? 0 : 16));
     }
 
-    bool read()
+    bool getState()
     {
       return (gpioInstance_->IDR & (1 << pin));
     }

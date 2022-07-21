@@ -26,6 +26,19 @@
         "interface": "swd",
         "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
         "runToEntryPoint": "main"
-    }
+    },
+    {
+      "name": "Shift Registers example",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "stlink",
+      "cwd": "${workspaceRoot}",
+      "executable": "${workspaceRoot}/build/STM32-projects/src/shift-registers-example/Debug/shift-registers-example.elf",
+      "device": "STM32F401CC",
+      "v1": false,
+      "interface": "swd",
+      "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+      "runToEntryPoint": "main"
+  }
   ]
 }

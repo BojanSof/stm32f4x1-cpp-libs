@@ -1,17 +1,13 @@
 cmake_minimum_required(VERSION 3.18)
 
-set(TARGET "stm32f401-devices")
+set(TARGET "external-devices")
 
 add_library(${TARGET})
 target_sources(${TARGET}
-  PRIVATE
-    "include/Gpio.hpp"
-    "include/Clock.hpp"
-    "include/CycleCounter.hpp"
+    PRIVATE
+      "include/Piso.hpp"
+      "include/Sipo.hpp"
 
-    "src/Clock.cpp"
-    "src/CycleCounter.cpp"
-    
 )
 
 target_include_directories(${TARGET}
@@ -27,5 +23,5 @@ target_compile_features(${TARGET}
 
 target_link_libraries(${TARGET}
   PUBLIC
-    CMSIS::STM32::F401CC
-    STM32::NoSys)
+    stm32f401-devices
+)

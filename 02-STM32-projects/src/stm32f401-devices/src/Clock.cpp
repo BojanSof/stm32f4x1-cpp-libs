@@ -6,7 +6,7 @@ namespace Stm32
 {
   void deviceInit()
   {
-    FLASH->ACR |= FLASH_ACR_LATENCY_2WS;
+    FLASH->ACR |= FLASH_ACR_LATENCY_2WS;          // CPU cannot fetch the instruction with 84 MHZ from the flash
     RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;             // APB1 prescaler = 2 (Max frequency allowed 42 MHz)
     RCC->CR |= RCC_CR_HSEON;                      // Enable external oscillator
     while(!(RCC->CR & RCC_CR_HSERDY));            // Wait until clock gets stabilized

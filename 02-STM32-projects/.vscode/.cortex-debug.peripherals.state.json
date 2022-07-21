@@ -1,1 +1,1 @@
-[{"node":"GPIOC.ODR","expanded":true,"format":0},{"node":"RCC","expanded":true,"format":0,"pinned":false},{"node":"RCC.CFGR","expanded":true,"format":0}]
+[{"node":"GPIOC.ODR","expanded":true,"format":0},{"node":"RCC.CFGR","expanded":true,"format":0},{"node":"SCB","expanded":true,"format":0,"pinned":false},{"node":"SYSCFG","expanded":true,"format":0,"pinned":false}]
