@@ -4,13 +4,15 @@ set(TARGET "stm32f401-devices")
 
 add_library(${TARGET})
 target_sources(${TARGET}
-  PRIVATE
+  PUBLIC
     "include/Gpio.hpp"
     "include/Clock.hpp"
     "include/CycleCounter.hpp"
-
+    "include/GeneralPurposeTimer.hpp"
+  PRIVATE
     "src/Clock.cpp"
     "src/CycleCounter.cpp"
+    "src/GeneralPurposeTimer.cpp"
     
 )
 

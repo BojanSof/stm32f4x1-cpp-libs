@@ -45,6 +45,26 @@ enum class GpioPullType : uint8_t
   Reserved = 0b11
 };
 
+enum class GpioAlternateFunction : uint8_t
+{
+  Af0   = 0x0,
+  Af1   = 0x1,
+  Af2   = 0x2,
+  Af3   = 0x3,
+  Af4   = 0x4,
+  Af5   = 0x5,
+  Af6   = 0x6,
+  Af7   = 0x7,
+  Af8   = 0x8,
+  Af9   = 0x9,
+  Af10  = 0xA,
+  Af11  = 0xB,
+  Af12  = 0xC,
+  Af13  = 0xD,
+  Af14  = 0xE,
+  Af15  = 0xF
+};
+
 template <Port port, uint8_t pin> class Gpio
 {
   public:
@@ -122,6 +142,18 @@ template <Port port, uint8_t pin> class Gpio
       gpioInstance_->PUPDR |= static_cast<uint8_t>(pull) << (2*pin);
     }
 
+    void setAlternateFunction(const GpioAlternateFunction &af)
+    {
+      setMode(GpioMode::Alternate);
+      if constexpr(pin < 8)
+      {
+        gpioInstance_->AFR[0] |= static_cast<uint8_t>(af) << (4*pin);
+      }
+      else
+      {
+        gpioInstance_->AFR[1] |= static_cast<uint8_t>(af) << (4*pin);
+      }
+    }
   private:
     constexpr static GPIO_TypeDef * getGpioInstance()
     {

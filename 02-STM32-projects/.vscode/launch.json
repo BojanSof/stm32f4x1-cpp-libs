@@ -39,6 +39,31 @@
       "interface": "swd",
       "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
       "runToEntryPoint": "main"
+  },
+  {
+    "name": "Timer test",
+    "type": "cortex-debug",
+    "request": "launch",
+    "servertype": "stlink",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/timer-interface-test/Debug/timer-interface-test.elf",
+    "device": "STM32F401CC",
+    "v1": false,
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
+  },
+  {
+    "name": "Timer test Jlink",
+    "type": "cortex-debug",
+    "request": "launch",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/timer-interface-test/Debug/timer-interface-test.elf",
+    "servertype": "jlink",
+    "device": "STM32F401CC",
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
   }
   ]
 }
