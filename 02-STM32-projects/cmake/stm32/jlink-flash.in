@@ -1,0 +1,5 @@
+h
+loadbin ${BINARY}, ${FLASH_START}
+r
+g
+qc
