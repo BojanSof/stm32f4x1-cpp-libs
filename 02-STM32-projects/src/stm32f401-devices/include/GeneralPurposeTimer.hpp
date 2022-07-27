@@ -46,22 +46,85 @@ namespace Stm32
       static constexpr auto centerAlignedMode  = CenterAlignedMode;
   };
 
+
+
   template <
           uint32_t Period
-      ,   uint32_t DutyCycle
-      ,   uint8_t CcChannel
-      ,   bool OutputEnable
-      ,   bool Polarity >
+        , uint32_t DutyCycle
+        , uint8_t CcChannel
+        , bool OutputEnable
+        , bool Polarity >
   struct PwmModeConfig : public TimerModeConfig<
                                       TimerMode::PwmOutput, 
                                       TimerDirection::Up, 
                                       TimerCenterAlignedMode::Edge >
   {
-      static constexpr auto period = Period;
-      static constexpr auto dutyCycle = DutyCycle;
-      static constexpr auto ccChannel = CcChannel;
-      static constexpr auto outputEnable = OutputEnable;
-      static constexpr auto polarity = Polarity;
+    static constexpr auto period = Period;
+    static constexpr auto dutyCycle = DutyCycle;
+    static constexpr auto ccChannel = CcChannel;
+    static constexpr auto outputEnable = OutputEnable;
+    static constexpr auto polarity = Polarity;
+  };
+
+  enum class TimerDigitalFilter
+  {
+    NoFilter        = 0b0000,
+    FreqInternalN2  = 0b0001,
+    FreqInternalN4  = 0b0010,
+    FreqInternalN8  = 0b0011,
+    FreqDtsDiv2N6   = 0b0100,
+    FreqDtsDiv2N8   = 0b0101,
+    FreqDtsDiv4N6   = 0b0110,
+    FreqDtsDiv4N8   = 0b0111,
+    FreqDtsDiv8N6   = 0b1000,
+    FreqDtsDiv8N8   = 0b1001,
+    FreqDtsDiv16N5  = 0b1010,
+    FreqDtsDiv16N6  = 0b1011,
+    FreqDtsDiv16N8  = 0b1100,
+    FreqDtsDiv32N5  = 0b1101,
+    FreqDtsDiv32N6  = 0b1110,
+    FreqDtsDiv32N8  = 0b1111
+  };
+
+  enum class TimerCapturePolarity
+  {
+    RisingEdge    = 0b000,
+    FallingEdge   = 0b001,
+    BothEdges     = 0b101
+  };
+
+  enum class TimerCapturePrescaler
+  {
+    Div1  = 0b00,
+    Div2  = 0b01,
+    Div4  = 0b10,
+    Div8  = 0b11
+  };
+
+  enum class TimerCaptureCompareSelection : uint8_t
+  {
+    Output          = 0b00,
+    InputTiChannel  = 0b01,
+    InputTiOther    = 0b10,
+    InputTrc        = 0b11
+  };
+
+  template <
+          uint32_t Period
+        , uint8_t CcChannel
+        , TimerDigitalFilter InputFilter
+        , TimerCapturePolarity EdgeTrigger
+        , TimerCapturePrescaler Prescaler >
+  struct InputCaptureConfig : public TimerModeConfig<
+                                      TimerMode::InputCapture, 
+                                      TimerDirection::Up, 
+                                      TimerCenterAlignedMode::Edge >
+  {
+    static constexpr auto period = Period;
+    static constexpr auto channel = CcChannel;
+    static constexpr auto inputFilter = InputFilter;
+    static constexpr auto edgeTrigger = EdgeTrigger;
+    static constexpr auto prescaler = Prescaler;
   };
 
   template< uint8_t TimerIndex >
@@ -188,34 +251,144 @@ namespace Stm32
         {
           setPeriod(config.period);
           setCaptureCompare<config.ccChannel>(config.dutyCycle);
-          setOutputPreloadEnable<config.ccChannel>(true);
+          selectCaptureOrCompare<config.ccChannel, TimerCaptureCompareSelection::Output>();
+          setOutputPreloadEnable<config.ccChannel, true>();
           setPwmMode<config.ccChannel>();
-          setOutputEnable<config.ccChannel, config.outputEnable>();
           setPolarity<config.ccChannel, config.polarity>();
+          enableCaptureCompare<config.ccChannel, config.outputEnable>();
+        }
+        else if constexpr(config.mode == TimerMode::InputCapture)
+        {
+          setPeriod(config.period);
+          selectCaptureOrCompare<config.ccChannel, TimerCaptureCompareSelection::InputTiChannel>();
+          setDigitalFilter<config.ccChannel, config.inputFilter>();
+          setPrescaler<config.ccChannel, config.prescaler>();
+          setEdgeTrigger<config.ccChannel, config.edgeTrigger>();
+          enableCaptureCompare<config.ccChannel, true>();
         }
       }
 
-      template <uint8_t Channel>
-      void setOutputPreloadEnable(const bool enable)
+      template <uint8_t Channel, TimerCaptureCompareSelection Selection>
+      void selectCaptureOrCompare()
       {
         if constexpr(Channel == 1)
         {
-          if(enable) timerInstance_->CCMR1 |= TIM_CCMR1_OC1PE;
+          timerInstance_->CCMR1 &= ~(0x3 << TIM_CCMR1_CC1S_Pos);
+          timerInstance_->CCMR1 |= static_cast<uint8_t>(Selection) << TIM_CCMR1_CC1S_Pos;
+        }
+        else if constexpr(Channel == 2)
+        {
+          timerInstance_->CCMR1 &= ~(0x3 << TIM_CCMR1_CC2S_Pos);
+          timerInstance_->CCMR1 |= static_cast<uint8_t>(Selection) << TIM_CCMR1_CC2S_Pos;
+        }
+        else if constexpr(Channel == 3)
+        {
+          timerInstance_->CCMR2 &= ~(0x3 << TIM_CCMR2_CC3S_Pos);
+          timerInstance_->CCMR2 |= static_cast<uint8_t>(Selection) << TIM_CCMR2_CC3S_Pos;
+        }
+        else if constexpr(Channel = 4)
+        {
+          timerInstance_->CCMR2 &= ~(0x3 << TIM_CCMR2_CC4S_Pos);
+          timerInstance_->CCMR2 |= static_cast<uint8_t>(Selection) << TIM_CCMR2_CC4S_Pos;
+        }
+      }
+
+      template <uint8_t Channel, TimerDigitalFilter Filter>
+      void setDigitalFilter()
+      {
+        if constexpr(Channel == 1)
+        {
+          timerInstance_->CCMR1 &= ~(0xF << TIM_CCMR1_IC1F_Pos);
+          timerInstance_->CCMR1 |= static_cast<uint8_t>(Filter) << TIM_CCMR1_IC1F_Pos;
+        }
+        else if constexpr(Channel == 2)
+        {
+          timerInstance_->CCMR1 &= ~(0xF << TIM_CCMR1_IC2F_Pos);
+          timerInstance_->CCMR1 |= static_cast<uint8_t>(Filter) << TIM_CCMR1_IC2F_Pos;
+        }
+        else if constexpr(Channel == 3)
+        {
+          timerInstance_->CCMR2 &= ~(0xF << TIM_CCMR2_IC3F_Pos);
+          timerInstance_->CCMR2 |= static_cast<uint8_t>(Filter) << TIM_CCMR2_IC3F_Pos;
+        }
+        else if constexpr(Channel == 4)
+        {
+          timerInstance_->CCMR2 &= ~(0xF << TIM_CCMR2_IC4F_Pos);
+          timerInstance_->CCMR2 |= static_cast<uint8_t>(Filter) << TIM_CCMR2_IC4F_Pos;
+        }
+      }
+      
+      template <uint8_t Channel, TimerCapturePrescaler Prescaler>
+      void setPrescaler()
+      {
+        if constexpr(Channel == 1)
+        {
+          timerInstance_->CCMR1 &= ~(0x3 << TIM_CCMR1_IC1PSC_Pos);
+          timerInstance_->CCMR1 |= static_cast<uint8_t>(Prescaler) << TIM_CCMR1_IC1PSC_Pos;
+        }
+        else if constexpr(Channel == 2)
+        {
+          timerInstance_->CCMR1 &= ~(0x3 << TIM_CCMR1_IC2PSC_Pos);
+          timerInstance_->CCMR1 |= static_cast<uint8_t>(Prescaler) << TIM_CCMR1_IC2PSC_Pos;
+        }
+        else if constexpr(Channel == 3)
+        {
+          timerInstance_->CCMR2 &= ~(0x3 << TIM_CCMR2_IC3PSC_Pos);
+          timerInstance_->CCMR2 |= static_cast<uint8_t>(Prescaler) << TIM_CCMR2_IC3PSC_Pos;
+        }
+        else if constexpr(Channel == 4)
+        {
+          timerInstance_->CCMR2 &= ~(0x3 << TIM_CCMR2_IC4PSC_Pos);
+          timerInstance_->CCMR2 |= static_cast<uint8_t>(Prescaler) << TIM_CCMR2_IC4PSC_Pos;
+        }
+      }
+
+      template <uint8_t Channel, TimerCapturePolarity Triger>
+      void setEdgeTrigger()
+      {
+        if constexpr(Channel == 1)
+        {
+          timerInstance_->CCER &= ~(0x7 << TIM_CCER_CC1P_Pos);
+          timerInstance_->CCER |= static_cast<uint8_t>(Triger) << TIM_CCER_CC1P_Pos;
+        }
+        else if constexpr(Channel == 2)
+        {
+          timerInstance_->CCER &= ~(0x7 << TIM_CCER_CC2P_Pos);
+          timerInstance_->CCER |= static_cast<uint8_t>(Triger) << TIM_CCER_CC2P_Pos;
+        }
+        else if constexpr(Channel == 3)
+        {
+          timerInstance_->CCER &= ~(0x7 << TIM_CCER_CC3P_Pos);
+          timerInstance_->CCER |= static_cast<uint8_t>(Triger) << TIM_CCER_CC3P_Pos;
+        }
+        else if constexpr(Channel == 4)
+        {
+          timerInstance_->CCER &= ~(0x7 << TIM_CCER_CC4P_Pos);
+          timerInstance_->CCER |= static_cast<uint8_t>(Triger) << TIM_CCER_CC4P_Pos;
+        }
+      }
+      
+      template <uint8_t Channel, bool Enable>
+      void setOutputPreloadEnable()
+      {
+        if constexpr(Channel == 1)
+        {
+          if constexpr(Enable) timerInstance_->CCMR1 |= TIM_CCMR1_OC1PE;
           else timerInstance_->CCMR1 &= ~TIM_CCMR1_OC1PE;
         }
         else if constexpr(Channel == 2)
         {
-          if(enable) timerInstance_->CCMR1 |= TIM_CCMR1_OC2PE;
+          if constexpr(Enable) timerInstance_->CCMR1 |= TIM_CCMR1_OC2PE;
           else timerInstance_->CCMR1 &= ~TIM_CCMR1_OC2PE;
         }
         else if constexpr(Channel == 3)
         {
-          if(enable) timerInstance_->CCMR2 |= TIM_CCMR2_OC3PE;
+          if constexpr(Enable) timerInstance_->CCMR2 |= TIM_CCMR2_OC3PE;
           else timerInstance_->CCMR2 &= ~TIM_CCMR2_OC3PE;
         }
         else if constexpr(Channel == 4)
         {
-          if(enable) timerInstance_->CCMR2 |= TIM_CCMR2_OC4PE;
+          if constexpr(Enable) timerInstance_->CCMR2 |= TIM_CCMR2_OC4PE;
           else timerInstance_->CCMR2 &= ~TIM_CCMR2_OC4PE;
         }
       }
@@ -228,47 +401,48 @@ namespace Stm32
       {
         if constexpr(Channel == 1)
         {
+          timerInstance_->CCMR1 &= ~(0x7 << TIM_CCMR1_OC1M_Pos);
           timerInstance_->CCMR1 |= 0b110 << TIM_CCMR1_OC1M_Pos;
         }
         else if constexpr(Channel == 2)
         {
+          timerInstance_->CCMR1 &= ~(0x7 << TIM_CCMR1_OC2M_Pos);
           timerInstance_->CCMR1 |= 0b110 << TIM_CCMR1_OC2M_Pos;
         }
         else if constexpr(Channel == 3)
         {
+          timerInstance_->CCMR2 &= ~(0x7 << TIM_CCMR2_OC3M_Pos);
           timerInstance_->CCMR2 |= 0b110 << TIM_CCMR2_OC3M_Pos;
         }
         else if constexpr(Channel == 4)
         {
+          timerInstance_->CCMR2 &= ~(0x7 << TIM_CCMR2_OC4M_Pos);
           timerInstance_->CCMR2 |= 0b110 << TIM_CCMR2_OC4M_Pos;
         }
       }
 
-      template <uint8_t Channel, bool OutputEnable>
-      void setOutputEnable()
+      template <uint8_t Channel, bool Enable>
+      void enableCaptureCompare()
       {
-        if constexpr(OutputEnable)
+        if constexpr(Channel == 1)
         {
-          if constexpr(Channel == 1)
-          {
-            timerInstance_->CCMR1 &= ~TIM_CCMR1_CC1S;   // set the channel as output
-            timerInstance_->CCER |= TIM_CCER_CC1E;      // enable output compare (OC)
-          }
-          else if constexpr(Channel == 2)
-          {
-            timerInstance_->CCMR1 &= ~TIM_CCMR1_CC2S;
-            timerInstance_->CCER |= TIM_CCER_CC2E;
-          }
-          else if constexpr(Channel == 3)
-          {
-            timerInstance_->CCMR2 &= ~TIM_CCMR2_CC3S;
-            timerInstance_->CCER |= TIM_CCER_CC3E;
-          }
-          else if constexpr(Channel == 4)
-          {
-            timerInstance_->CCMR2 &= ~TIM_CCMR2_CC4S;
-            timerInstance_->CCER |= TIM_CCER_CC4E;
-          }
+          if constexpr(Enable) timerInstance_->CCER |= TIM_CCER_CC1E;
+          else timerInstance_->CCER &= ~TIM_CCER_CC1E;
+        }
+        else if constexpr(Channel == 2)
+        {
+          if constexpr(Enable) timerInstance_->CCER |= TIM_CCER_CC2E;
+          else timerInstance_->CCER &= ~TIM_CCER_CC2E;
+        }
+        else if constexpr(Channel == 3)
+        {
+          if constexpr(Enable) timerInstance_->CCER |= TIM_CCER_CC3E;
+          else timerInstance_->CCER &= ~TIM_CCER_CC3E;
+        }
+        else if constexpr(Channel == 4)
+        {
+          if constexpr(Enable) timerInstance_->CCER |= TIM_CCER_CC4E;
+          else timerInstance_->CCER &= ~TIM_CCER_CC4E;
         }
       }
 
