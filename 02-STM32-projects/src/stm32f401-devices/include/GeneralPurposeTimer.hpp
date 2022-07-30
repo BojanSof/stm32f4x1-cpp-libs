@@ -112,6 +112,7 @@ namespace Stm32
   template <
           uint32_t Period
         , uint8_t CcChannel
+        , TimerCaptureCompareSelection InputSelection
         , TimerDigitalFilter InputFilter
         , TimerCapturePolarity EdgeTrigger
         , TimerCapturePrescaler Prescaler >
@@ -120,8 +121,14 @@ namespace Stm32
                                       TimerDirection::Up, 
                                       TimerCenterAlignedMode::Edge >
   {
+    InputCaptureConfig()
+    {
+      static_assert(InputSelection != TimerCaptureCompareSelection::Output,
+                    "Invalid capture input selection");
+    }
     static constexpr auto period = Period;
-    static constexpr auto channel = CcChannel;
+    static constexpr auto ccChannel = CcChannel;
+    static constexpr auto inputSelection = InputSelection;
     static constexpr auto inputFilter = InputFilter;
     static constexpr auto edgeTrigger = EdgeTrigger;
     static constexpr auto prescaler = Prescaler;
@@ -234,6 +241,32 @@ namespace Stm32
         }
       }
 
+      uint32_t getCountTime() const
+      {
+        return (timerInstance_->CNT + 1) * timeDivisionFactor_;
+      }
+
+      template <uint8_t Channel>
+      uint32_t getCaptureCompareTime() const
+      {
+        if constexpr(Channel == 1)
+        {
+          return (timerInstance_->CCR1 + 1) * timeDivisionFactor_;
+        }
+        else if constexpr(Channel == 2)
+        {
+          return (timerInstance_->CCR2 + 1) * timeDivisionFactor_;
+        }
+        else if constexpr(Channel == 3)
+        {
+          return (timerInstance_->CCR3 + 1) * timeDivisionFactor_;
+        }
+        else if constexpr(Channel == 4)
+        {
+          return (timerInstance_->CCR4 + 1) * timeDivisionFactor_;
+        }
+      }
+
       void start()
       {
         timerInstance_->CR1 |= TIM_CR1_CEN;
@@ -245,7 +278,7 @@ namespace Stm32
       }
 
       template < typename ConfigT >
-      void setMode(const ConfigT& config = ConfigT())
+      void configureCaptureCompareChannel(const ConfigT& config = ConfigT())
       {
         if constexpr(config.mode == TimerMode::PwmOutput)
         {
@@ -260,7 +293,7 @@ namespace Stm32
         else if constexpr(config.mode == TimerMode::InputCapture)
         {
           setPeriod(config.period);
-          selectCaptureOrCompare<config.ccChannel, TimerCaptureCompareSelection::InputTiChannel>();
+          selectCaptureOrCompare<config.ccChannel, config.inputSelection>();
           setDigitalFilter<config.ccChannel, config.inputFilter>();
           setPrescaler<config.ccChannel, config.prescaler>();
           setEdgeTrigger<config.ccChannel, config.edgeTrigger>();
@@ -286,7 +319,7 @@ namespace Stm32
           timerInstance_->CCMR2 &= ~(0x3 << TIM_CCMR2_CC3S_Pos);
           timerInstance_->CCMR2 |= static_cast<uint8_t>(Selection) << TIM_CCMR2_CC3S_Pos;
         }
-        else if constexpr(Channel = 4)
+        else if constexpr(Channel == 4)
         {
           timerInstance_->CCMR2 &= ~(0x3 << TIM_CCMR2_CC4S_Pos);
           timerInstance_->CCMR2 |= static_cast<uint8_t>(Selection) << TIM_CCMR2_CC4S_Pos;

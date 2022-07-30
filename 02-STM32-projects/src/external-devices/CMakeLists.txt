@@ -7,6 +7,7 @@ target_sources(${TARGET}
     PRIVATE
       "include/Piso.hpp"
       "include/Sipo.hpp"
+      "include/SevenSegmentDisplay.hpp"
 
 )
 

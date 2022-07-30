@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
 
-set(TARGET "timer-interface-test")
+set(TARGET "ultrasonic-measure")
 
 add_executable(${TARGET})
 target_sources(${TARGET}
     PRIVATE
-      TimerTest.cpp
+      UltrasonicMeasure.cpp
 )
 
 target_compile_features(${TARGET}
@@ -15,6 +15,7 @@ target_compile_features(${TARGET}
 target_link_libraries(${TARGET}
   PUBLIC
     stm32f401-devices
+    external-devices
     CMSIS::STM32::F401CC
     STM32::NoSys)
 
