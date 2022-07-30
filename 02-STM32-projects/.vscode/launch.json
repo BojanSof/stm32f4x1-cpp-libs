@@ -1,39 +1,26 @@
 {
   "version": "0.2.0",
   "configurations": [
-      {
-          "name": "Blink First Example",
-          "type": "cortex-debug",
-          "request": "launch",
-          "servertype": "stlink",
-          "cwd": "${workspaceRoot}",
-          "executable": "${workspaceRoot}/build/STM32-projects/src/blink-first-example/Debug/blink-first-example.elf",
-          "device": "STM32F401CC",
-          "v1": false,
-          "interface": "swd",
-          "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
-          "runToEntryPoint": "main"
-      },
-      {
-        "name": "Blink GPIO interface",
-        "type": "cortex-debug",
-        "request": "launch",
-        "servertype": "stlink",
-        "cwd": "${workspaceRoot}",
-        "executable": "${workspaceRoot}/build/STM32-projects/src/blink-gpio-interface/Debug/blink-gpio-interface.elf",
-        "device": "STM32F401CC",
-        "v1": false,
-        "interface": "swd",
-        "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
-        "runToEntryPoint": "main"
-    },
     {
-      "name": "Shift Registers example",
+      "name": "Blink First Example STlink",
       "type": "cortex-debug",
       "request": "launch",
       "servertype": "stlink",
       "cwd": "${workspaceRoot}",
-      "executable": "${workspaceRoot}/build/STM32-projects/src/shift-registers-example/Debug/shift-registers-example.elf",
+      "executable": "${workspaceRoot}/build/STM32-projects/src/blink-first-example/Debug/blink-first-example.elf",
+      "device": "STM32F401CC",
+      "v1": false,
+      "interface": "swd",
+      "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+      "runToEntryPoint": "main"
+    },
+    {
+      "name": "Blink GPIO interface STlink",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "stlink",
+      "cwd": "${workspaceRoot}",
+      "executable": "${workspaceRoot}/build/STM32-projects/src/blink-gpio-interface/Debug/blink-gpio-interface.elf",
       "device": "STM32F401CC",
       "v1": false,
       "interface": "swd",
@@ -41,7 +28,20 @@
       "runToEntryPoint": "main"
   },
   {
-    "name": "Timer test",
+    "name": "Shift Registers test STlink",
+    "type": "cortex-debug",
+    "request": "launch",
+    "servertype": "stlink",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/shift-registers-example/Debug/shift-registers-example.elf",
+    "device": "STM32F401CC",
+    "v1": false,
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
+  },
+  {
+    "name": "Timer test STlink",
     "type": "cortex-debug",
     "request": "launch",
     "servertype": "stlink",
@@ -54,11 +54,23 @@
     "runToEntryPoint": "main"
   },
   {
-    "name": "Timer test Jlink",
+    "name": "Timer test JLink",
     "type": "cortex-debug",
     "request": "launch",
     "cwd": "${workspaceRoot}",
     "executable": "${workspaceRoot}/build/STM32-projects/src/timer-interface-test/Debug/timer-interface-test.elf",
+    "servertype": "jlink",
+    "device": "STM32F401CC",
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
+  },
+  {
+    "name": "Ultrasonic Measure JLink",
+    "type": "cortex-debug",
+    "request": "launch",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/ultrasonic-measure/Debug/ultrasonic-measure.elf",
     "servertype": "jlink",
     "device": "STM32F401CC",
     "interface": "swd",
