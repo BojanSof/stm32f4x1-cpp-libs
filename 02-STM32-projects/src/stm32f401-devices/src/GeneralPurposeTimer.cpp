@@ -57,7 +57,7 @@ extern "C"
     using namespace Stm32;
     if(TIM1->SR & TIM_SR_UIF)
     {
-      if(GeneralPurposeTimer<1>::overflowCallback_) // ZOSTO NE CONSTEXPR?
+      if(GeneralPurposeTimer<1>::overflowCallback_)
       {
         GeneralPurposeTimer<1>::overflowCallback_();
       }
