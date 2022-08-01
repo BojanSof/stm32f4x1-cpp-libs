@@ -5,7 +5,7 @@ set(TARGET "shift-registers-example")
 add_executable(${TARGET})
 target_sources(${TARGET}
   PRIVATE
-    shiftregs.cpp
+    ShiftRegs.cpp
 )
 
 target_compile_features(${TARGET}
