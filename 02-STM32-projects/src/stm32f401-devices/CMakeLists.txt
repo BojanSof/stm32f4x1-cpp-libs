@@ -9,6 +9,7 @@ target_sources(${TARGET}
     "include/Clock.hpp"
     "include/CycleCounter.hpp"
     "include/GeneralPurposeTimer.hpp"
+    "include/ComInterface.hpp"
   PRIVATE
     "src/Clock.cpp"
     "src/GeneralPurposeTimer.cpp"
