@@ -4,19 +4,18 @@ set(TARGET "timer-interface-test")
 
 add_executable(${TARGET})
 target_sources(${TARGET}
-    PRIVATE
-      TimerTest.cpp
+  PRIVATE
+    TimerTest.cpp
 )
 
 target_compile_features(${TARGET}
-  PUBLIC
+  PRIVATE
     cxx_std_17)
 
 target_link_libraries(${TARGET}
   PUBLIC
     stm32f401-devices
-    CMSIS::STM32::F401CC
-    STM32::NoSys)
+)
 
 stm32_print_size_of_target(${TARGET})
 stm32_generate_binary_file(${TARGET})

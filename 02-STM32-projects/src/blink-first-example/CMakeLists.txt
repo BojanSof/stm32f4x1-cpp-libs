@@ -9,13 +9,14 @@ target_sources(${TARGET}
 )
 
 target_compile_features(${TARGET}
-  PUBLIC
+  PRIVATE
     cxx_std_17)
 
 target_link_libraries(${TARGET}
   PUBLIC
     CMSIS::STM32::F401CC
-    STM32::NoSys)
+    STM32::NoSys
+    STM32::Nano)
 
 stm32_print_size_of_target(${TARGET})
 stm32_generate_binary_file(${TARGET})

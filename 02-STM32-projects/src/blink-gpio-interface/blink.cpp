@@ -1,4 +1,3 @@
-// simple CMSIS only stm32f401 blink example
 #include <Gpio.hpp>
 #include <Clock.hpp>
 #include <cstdint>

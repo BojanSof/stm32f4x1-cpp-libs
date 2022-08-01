@@ -352,6 +352,15 @@ if(NOT (TARGET STM32::Nano::FloatScan))
     )
 endif()
 
+# C++ compile flags
+set(CMAKE_CXX_FLAGS
+  -fno-exceptions
+  -fno-unwind-tables
+  -fno-rtti
+  -fno-threadsafe-statics
+)
+string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
 include(stm32/utilities)
 include(stm32/f0)
 include(stm32/f1)

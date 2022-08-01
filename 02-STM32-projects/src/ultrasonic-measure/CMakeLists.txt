@@ -4,20 +4,18 @@ set(TARGET "ultrasonic-measure")
 
 add_executable(${TARGET})
 target_sources(${TARGET}
-    PRIVATE
-      UltrasonicMeasure.cpp
+  PRIVATE
+    UltrasonicMeasure.cpp
 )
 
 target_compile_features(${TARGET}
-  PUBLIC
+  PRIVATE
     cxx_std_17)
 
 target_link_libraries(${TARGET}
   PUBLIC
     stm32f401-devices
-    external-devices
-    CMSIS::STM32::F401CC
-    STM32::NoSys)
+    external-devices)
 
 stm32_print_size_of_target(${TARGET})
 stm32_generate_binary_file(${TARGET})
