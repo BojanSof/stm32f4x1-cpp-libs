@@ -25,5 +25,9 @@ namespace Stm32
     while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);  // Wait until main clock source is switched
     RCC->CR &= ~(RCC_CR_HSION);                   // Disabling internal oscillator
     while(RCC->CR & RCC_CR_HSIRDY);               // Wait until HSI is disabled
+
+    // Enable Cycle Counter, which is used as a steady clock and also for delays
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
   }
 }

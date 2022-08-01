@@ -11,7 +11,6 @@ target_sources(${TARGET}
     "include/GeneralPurposeTimer.hpp"
   PRIVATE
     "src/Clock.cpp"
-    "src/CycleCounter.cpp"
     "src/GeneralPurposeTimer.cpp"
 )
 

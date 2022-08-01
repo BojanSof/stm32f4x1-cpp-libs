@@ -1,50 +1,50 @@
 #ifndef STM32_CYCLE_COUNTER
 #define STM32_CYCLE_COUNTER
 
+#include <stm32f4xx.h>
+
 #include <cstdint>
+#include <chrono>
 #include "Clock.hpp"
 
 namespace Stm32
 {
+  /**
+   * Class providing steady clock using
+   * Cortex-M4 Cycle Counter timer
+   */
   class CycleCounter
   {
     public:
-      static CycleCounter& getInstance();
+      using period = std::ratio<1, CoreFrequency>;
+      using rep = int32_t;
+      using duration = std::chrono::duration<rep, period>;
+      using time_point = std::chrono::time_point<CycleCounter>;
+      static constexpr bool is_steady = true;
 
-      void start();
-      void stop();
-      uint32_t getCount();
-
-      void delayUs(const uint32_t us);
-      void delayMs(const uint32_t ms);
-
-      constexpr uint32_t ticksToUs(const uint32_t ticks)
+      /**
+       * @brief Get the current time point, measured from
+       * the Cycle Counter 0 value
+       * 
+       * @return time_point Current Cycle Counter time point
+       */
+      static time_point now() noexcept
       {
-        return ticks/(CoreFrequency/1000000U);
+        return time_point{ duration{ DWT->CYCCNT } };
       }
 
-      constexpr uint32_t usToTicks(const uint32_t us)
+      /**
+       * @brief Delay the execution of the code
+       * for at least the specified duration
+       * 
+       * @param dur Time duration for delay
+       */
+      template< class Rep, class Period >
+      static void delay(const std::chrono::duration<Rep, Period>& dur)
       {
-        return us * (CoreFrequency/1000000U);
+        auto t = now();
+        while(now() - t < dur());
       }
-
-      constexpr uint32_t ticksToMs(const uint32_t ticks)
-      {
-        return ticks/(CoreFrequency/1000U);
-      }
-
-      constexpr uint32_t msToTicks(const uint32_t ms)
-      {
-        return ms * (CoreFrequency/1000U);
-      }
-
-    private:
-      CycleCounter();
-      CycleCounter(const CycleCounter&) = delete;  // copy constructor
-      CycleCounter(const CycleCounter&&) = delete; // move constructor
-      void operator=(const CycleCounter&) = delete;
-      void operator=(const CycleCounter&&) = delete;
-
   };
 }
 
