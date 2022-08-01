@@ -10,7 +10,7 @@ int main()
 {
   deviceInit();
   Gpio<Port::A, 6> pwmPin;
-  pwmPin.setAlternateFunction(GpioAlternateFunction::Af2);
+  pwmPin.setAlternateFunction(GpioAlternateFunctionNumber::Af2);
   auto& timer = GeneralPurposeTimer<3>::getInstance();
   using PwmConfig = PwmModeConfig<50000,
                                   10,

@@ -12,9 +12,9 @@ int main()
   deviceInit();
 
   Gpio<Port::A, 6> triggerPin;
-  triggerPin.setAlternateFunction(GpioAlternateFunction::Af2);
+  triggerPin.setAlternateFunction(GpioAlternateFunctionNumber::Af2);
   Gpio<Port::B, 0> echoPin;
-  echoPin.setAlternateFunction(GpioAlternateFunction::Af2);
+  echoPin.setAlternateFunction(GpioAlternateFunctionNumber::Af2);
 
   auto& timer = GeneralPurposeTimer<3>::getInstance();
 

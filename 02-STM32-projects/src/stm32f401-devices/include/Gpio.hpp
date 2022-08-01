@@ -7,6 +7,11 @@
 namespace Stm32
 {
 
+  /**
+   * Possible GPIO ports for STM32F401CCU6,
+   * UQFN48 package
+   * 
+   */
   enum class Port
   {
     A,
@@ -45,7 +50,7 @@ namespace Stm32
     Reserved = 0b11
   };
 
-  enum class GpioAlternateFunction : uint8_t
+  enum class GpioAlternateFunctionNumber : uint8_t
   {
     Af0 = 0x0,
     Af1 = 0x1,
@@ -66,9 +71,22 @@ namespace Stm32
   };
 
   template <Port port, uint8_t pin>
+  struct GpioAlternateFunction
+  {
+    enum Type : uint8_t
+    {
+      Default = 0
+    } type_;
+  };
+
+  template <Port port, uint8_t pin>
   class Gpio
   {
   public:
+    using AlternateFunctions = GpioAlternateFunction<port, pin>;
+    static constexpr Port pinPort = port;
+    static constexpr uint8_t pinNumber = pin;
+
     Gpio()
     {
       static_assert(port == Port::A || port == Port::B ||
@@ -127,7 +145,7 @@ namespace Stm32
       gpioInstance_->PUPDR |= static_cast<uint8_t>(pull) << (2 * pin);
     }
 
-    void setAlternateFunction(const GpioAlternateFunction &af)
+    void setAlternateFunction(const GpioAlternateFunctionNumber &af)
     {
       setMode(GpioMode::Alternate);
       if constexpr (pin < 8)
@@ -138,6 +156,11 @@ namespace Stm32
       {
         gpioInstance_->AFR[1] |= static_cast<uint8_t>(af) << (4 * pin);
       }
+    }
+
+    void setAlternateFunction(const typename AlternateFunctions::Type af)
+    {
+      setAlternateFunction(static_cast<GpioAlternateFunctionNumber>(af));
     }
 
   private:
@@ -164,6 +187,21 @@ namespace Stm32
     }
     GPIO_TypeDef *const gpioInstance_ = getGpioInstance();
   };
+
+  // Specialize the alternate functions template class for each pin
+  template<>
+  struct GpioAlternateFunction<Port::A, 0>
+  {
+    enum Type : uint8_t
+    {
+      Default = 0,
+      TIM2_CH1 = 1,
+      TIM5_CH1 = 2,
+      USART2_CTS = 7,
+      EVENT_OUT = 15
+    } type_;
+  };
+  ///@todo Specialize for other pins
 
   // Pins on STM32F401CCU6, UQFN48 package
   namespace Pins
