@@ -17,7 +17,7 @@ namespace Stm32
   {
     public:
       using period = std::ratio<1, CoreFrequency>;
-      using rep = int32_t;
+      using rep = uint32_t;
       using duration = std::chrono::duration<rep, period>;
       using time_point = std::chrono::time_point<CycleCounter>;
       static constexpr bool is_steady = true;
@@ -43,7 +43,7 @@ namespace Stm32
       static void delay(const std::chrono::duration<Rep, Period>& dur)
       {
         auto t = now();
-        while(now() - t < dur());
+        while(now() - t < dur);
       }
   };
 }
