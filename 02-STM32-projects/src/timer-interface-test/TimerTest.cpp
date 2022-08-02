@@ -14,10 +14,9 @@ int main()
   auto& timer = GeneralPurposeTimer<3>::getInstance();
   using PwmConfig = PwmModeConfig<50000,
                                   10,
-                                  1,
                                   true,
                                   false>;
-  timer.configureCaptureCompareChannel<PwmConfig>();
+  timer.configureCaptureCompareChannel<1, PwmConfig>();
   //soft pwm
   //timer.enableOverflowInterrupt([&pin](){ pin.setLevel(true); });
   //timer.enableCaptureCompareInterrupt<1>([&pin](){ pin.setLevel(false); });

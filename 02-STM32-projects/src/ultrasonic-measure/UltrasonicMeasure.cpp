@@ -20,28 +20,25 @@ int main()
 
   using PwmConfig = PwmModeConfig<50000,
                                   10,
-                                  1,
                                   true,
                                   false>;
-  timer.configureCaptureCompareChannel<PwmConfig>();
+  timer.configureCaptureCompareChannel<1, PwmConfig>();
  
 
   using CaptureConfig1 = InputCaptureConfig<50000,
-                                            3,
                                             TimerCaptureCompareSelection::InputTiChannel,
                                             TimerDigitalFilter::NoFilter,
                                             TimerCapturePolarity::RisingEdge,
                                             TimerCapturePrescaler::Div1>;
 
   using CaptureConfig2 = InputCaptureConfig<50000,
-                                            4,
                                             TimerCaptureCompareSelection::InputTiOther,
                                             TimerDigitalFilter::NoFilter,
                                             TimerCapturePolarity::FallingEdge,
                                             TimerCapturePrescaler::Div1>;
 
-  timer.configureCaptureCompareChannel<CaptureConfig1>();
-  timer.configureCaptureCompareChannel<CaptureConfig2>();
+  timer.configureCaptureCompareChannel<3, CaptureConfig1>();
+  timer.configureCaptureCompareChannel<4, CaptureConfig2>();
 
   volatile uint32_t risingCapture = 0, travelTime = 0;
   volatile bool distanceMeasured = false;
