@@ -553,7 +553,7 @@ namespace Stm32
     void disableCaptureCompareInterrupt()
     {
       validateCaptureCompareChannel<Channel>();
-       if constexpr (Channel == 1)
+      if constexpr (Channel == 1)
       {
         timerInstance_->DIER &= ~TIM_DIER_CC1IE;
         captureCompareCallback1_ = nullptr;
