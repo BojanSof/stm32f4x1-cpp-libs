@@ -6,6 +6,8 @@ add_library(${TARGET})
 target_sources(${TARGET}
   PUBLIC
     "include/Gpio.hpp"
+    "include/GpioTypes.hpp"
+    "include/GpioAlternateFunctions.hpp"
     "include/Clock.hpp"
     "include/CycleCounter.hpp"
     "include/GeneralPurposeTimer.hpp"
