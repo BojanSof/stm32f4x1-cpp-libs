@@ -42,10 +42,11 @@ namespace Stm32
     TIM1_CH1N               =   0x106,
     TIM1_CH2N               =   0x107,
     TIM1_CH3N               =   0x108,
-    TIM2_CH1                =   0x109,
-    TIM2_CH2                =   0x10A,
-    TIM2_CH3                =   0x10B,
-    TIM2_CH4                =   0x10C,
+    TIM2_ETR                =   0x109,
+    TIM2_CH1                =   0x10A,
+    TIM2_CH2                =   0x10B,
+    TIM2_CH3                =   0x10C,
+    TIM2_CH4                =   0x10D,
     // AF2 (TIM3/TIM4/TIM5)
     TIM3_ETR                =   0x200,
     TIM3_CH1                =   0x201,
@@ -190,14 +191,521 @@ namespace Stm32
     {
       Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
       TIM2_CH1      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_CH1),
+      TIM2_ETR      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_ETR),
       TIM5_CH1      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM5_CH1),
       USART2_CTS    =   static_cast<uint16_t>(GpioAlternateFunctionId::USART2_CTS),
       EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
     };
 
-    static constexpr Type types[] = {Default, TIM2_CH1, TIM5_CH1, USART2_CTS, EVENT_OUT};
+    static constexpr Type types[] = {Default, TIM2_CH1, TIM2_ETR, TIM5_CH1, USART2_CTS, EVENT_OUT};
   };
-  ///@todo Specialize for other pins
+  template<>
+  struct GpioAlternateFunction<Port::A, 1>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM2_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_CH2),
+      TIM5_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM5_CH2),
+      USART2_RTS    =   static_cast<uint16_t>(GpioAlternateFunctionId::USART2_RTS),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM2_CH2, TIM5_CH2, USART2_RTS, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 2>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM2_CH3      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_CH3),
+      TIM5_CH3      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM5_CH3),
+      TIM9_CH1      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM9_CH1),
+      USART2_TX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART2_TX),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM2_CH3, TIM5_CH3, TIM9_CH1, USART2_TX, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 3>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM2_CH4      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_CH4),
+      TIM5_CH4      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM5_CH4),
+      TIM9_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM9_CH2),
+      USART2_RX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART2_RX),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM2_CH4, TIM5_CH4, TIM9_CH2, USART2_RX, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 4>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      SPI1_NSS      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_NSS),
+      SPI3_NSS      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_NSS),
+      I2S3_WS       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3_WS),
+      USART2_CK     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART2_CK),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, SPI1_NSS, SPI3_NSS, I2S3_WS, USART2_CK, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 5>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM2_CH1      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_CH1),
+      TIM2_ETR      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_ETR),
+      SPI1_SCK      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_SCK),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM2_CH1, TIM2_ETR, SPI1_SCK, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 6>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_BKIN     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_BKIN),
+      TIM3_CH1      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM3_CH1),
+      SPI1_MISO     =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_MISO),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_BKIN, TIM3_CH1, SPI1_MISO, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 7>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_CH1N     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH1N),
+      TIM3_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM3_CH2),
+      SPI1_MOSI     =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_MOSI),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_CH1N, TIM3_CH2, SPI1_MOSI, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 8>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      MCO_1         =   static_cast<uint16_t>(GpioAlternateFunctionId::MCO_1),
+      TIM1_CH1      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH1),
+      I2C3_SCL      =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C3_SCL),
+      USART1_CK     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART1_CK),
+      OTG_FS_SOF    =   static_cast<uint16_t>(GpioAlternateFunctionId::OTG_FS_SOF),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, MCO_1, TIM1_CH1, I2C3_SCL, USART1_CK, OTG_FS_SOF, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 9>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH2),
+      I2C3_SMBA     =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C3_SMBA),
+      USART1_TX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART1_TX),
+      OTG_FS_VBUS   =   static_cast<uint16_t>(GpioAlternateFunctionId::OTG_FS_VBUS),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_CH2, I2C3_SMBA, USART1_TX, OTG_FS_VBUS, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 10>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_CH3      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH3),
+      USART1_RX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART1_RX),
+      OTG_FS_ID   =   static_cast<uint16_t>(GpioAlternateFunctionId::OTG_FS_ID),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_CH3, USART1_RX, OTG_FS_ID, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 11>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_CH4      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH4),
+      USART1_CTS    =   static_cast<uint16_t>(GpioAlternateFunctionId::USART1_CTS),
+      USART6_TX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART6_TX),
+      OTG_FS_DM     =   static_cast<uint16_t>(GpioAlternateFunctionId::OTG_FS_DM),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_CH4, USART1_CTS, USART6_TX, OTG_FS_DM, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 12>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_ETR      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_ETR),
+      USART1_RTS    =   static_cast<uint16_t>(GpioAlternateFunctionId::USART1_RTS),
+      USART6_RX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART6_RX),
+      OTG_FS_DP     =   static_cast<uint16_t>(GpioAlternateFunctionId::OTG_FS_DP),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_ETR, USART1_RTS, USART6_RX, OTG_FS_DP, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 13>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      JTMS_SWDIO    =   static_cast<uint16_t>(GpioAlternateFunctionId::JTMS_SWDIO),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, JTMS_SWDIO, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 14>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      JTCK_SWCLK    =   static_cast<uint16_t>(GpioAlternateFunctionId::JTCK_SWCLK),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, JTCK_SWCLK, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::A, 15>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      JTDI          =   static_cast<uint16_t>(GpioAlternateFunctionId::JTDI),
+      TIM2_CH1      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_CH1),
+      TIM2_ETR      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_ETR),
+      SPI1_NSS      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_NSS),
+      SPI3_NSS      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_NSS),
+      I2S3_WS       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3_WS),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, JTDI, TIM2_CH1, TIM2_ETR, SPI1_NSS, SPI3_NSS, I2S3_WS, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::B, 0>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_CH2N     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH2N),
+      TIM3_CH3      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM3_CH3),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_CH2N, TIM3_CH3, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::B, 1>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_CH3N     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH3N),
+      TIM3_CH4      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM3_CH4),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_CH3N, TIM3_CH4, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::B, 2>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::B, 3>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      JTDO_SWO      =   static_cast<uint16_t>(GpioAlternateFunctionId::JTDO_SWO),
+      TIM2_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_CH2),
+      SPI1_SCK      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_SCK),
+      SPI3_SCK      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_SCK),
+      I2S3_CK       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3_CK),
+      I2C2_SDA_AF9  =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C2_SDA_AF9),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, JTDO_SWO, TIM2_CH2, SPI1_SCK, SPI3_SCK, I2S3_CK, I2C2_SDA_AF9, EVENT_OUT};
+  };
+  template<>
+  struct GpioAlternateFunction<Port::B, 4>
+  {
+    enum Type : uint16_t
+    {
+      Default        =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      JTRST          =   static_cast<uint16_t>(GpioAlternateFunctionId::JTRST),
+      TIM3_CH1       =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM3_CH1),
+      SPI1_MISO      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_MISO),
+      SPI3_MISO      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_MISO),
+      I2S3ext_SD_AF7 =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3ext_SD_AF7),
+      I2C3_SDA_AF9   =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C3_SDA_AF9),
+      EVENT_OUT      =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, JTRST, TIM3_CH1, SPI1_MISO, SPI3_MISO, I2S3ext_SD_AF7, I2C3_SDA_AF9, EVENT_OUT};
+  };
+  
+  template<>
+  struct GpioAlternateFunction<Port::B, 5>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM3_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM3_CH2),
+      I2C1_SMBA     =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C1_SMBA),
+      SPI1_MOSI     =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_MOSI),
+      SPI3_MOSI_AF6 =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_MOSI_AF6),
+      I2S3_SD_AF6   =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3_SD_AF6),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM3_CH2, I2C1_SMBA, SPI1_MOSI, SPI3_MOSI_AF6, I2S3_SD_AF6, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::B, 6>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM4_CH1      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM4_CH1),
+      I2C1_SCL      =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C1_SCL),
+      USART1_TX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART1_TX),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM4_CH1, I2C1_SCL, USART1_TX, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::B, 7>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM4_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM4_CH2),
+      I2C1_SDA      =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C1_SDA),
+      USART1_RX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART1_RX),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM4_CH2, I2C1_SDA, USART1_RX, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::B, 8>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM4_CH3      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM4_CH3),
+      TIM10_CH1     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM10_CH1),
+      I2C1_SCL      =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C1_SCL),
+      SDIO_D4       =   static_cast<uint16_t>(GpioAlternateFunctionId::SDIO_D4),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM4_CH3, TIM10_CH1, I2C1_SCL, SDIO_D4, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::B, 9>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM4_CH4      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM4_CH4),
+      TIM11_CH1     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM11_CH1),
+      I2C1_SDA      =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C1_SDA),
+      SPI2_NSS      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI2_NSS),
+      I2S2_WS       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S2_WS),
+      SDIO_D5       =   static_cast<uint16_t>(GpioAlternateFunctionId::SDIO_D5),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM4_CH4, TIM11_CH1, I2C1_SDA, SPI2_NSS, I2S2_WS, SDIO_D5, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::B, 10>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM2_CH3      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM2_CH3),
+      I2C2_SCL      =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C2_SCL),
+      SPI2_SCK      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI2_SCK),
+      I2S2_CK       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S2_CK),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM2_CH3, I2C2_SCL, SPI2_SCK, I2S2_CK, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::B, 12>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_BKIN     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_BKIN),
+      I2C2_SMBA     =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C2_SMBA),
+      SPI2_NSS      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI2_NSS),
+      I2S2_WS       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S2_WS),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_BKIN, I2C2_SMBA, SPI2_NSS, I2S2_WS, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::B, 13>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_CH1N     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH1N),
+      SPI2_SCK      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI2_SCK),
+      I2S2_CK       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S2_CK),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_CH1N, SPI2_SCK, I2S2_CK, EVENT_OUT};
+  };
+  
+  template<>
+  struct GpioAlternateFunction<Port::B, 14>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      TIM1_CH2N     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH2N),
+      SPI2_MISO     =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI2_MISO),
+      I2S2ext_SD      =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S2ext_SD),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, TIM1_CH2N, SPI2_MISO, I2S2ext_SD, EVENT_OUT};
+  };
+  
+  template<>
+  struct GpioAlternateFunction<Port::B, 15>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      RTC_REFN      =   static_cast<uint16_t>(GpioAlternateFunctionId::RTC_REFN),
+      TIM1_CH3N     =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH3N),
+      SPI2_MOSI      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI2_MOSI),
+      I2S2_SD       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S2_SD),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, RTC_REFN, TIM1_CH3N, SPI2_MOSI, I2S2_SD, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::C, 13>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::C, 14>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::C, 15>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::H, 0>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, EVENT_OUT};
+  };
+
+  template<>
+  struct GpioAlternateFunction<Port::H, 1>
+  {
+    enum Type : uint16_t
+    {
+      Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
+      EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
+    };
+
+    static constexpr Type types[] = {Default, EVENT_OUT};
+  };
 }
 
 #endif //STM32_GPIO_ALTERNATE_FUNCTIONS_HPP
