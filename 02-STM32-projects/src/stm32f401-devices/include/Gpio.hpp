@@ -3,9 +3,12 @@
 
 #include "GpioTypes.hpp"
 #include "GpioAlternateFunctions.hpp"
+#include "ExternalInterruptController.hpp"
 
 #include <stm32f4xx.h>
 #include <cstdint>
+#include <functional>
+
 
 namespace Stm32
 {
@@ -40,6 +43,19 @@ namespace Stm32
       {
         RCC->AHB1ENR |= RCC_AHB1ENR_GPIOHEN;
       }
+    }
+
+    template<GpioExternalInterruptEdge Edge>
+    void enableInterrupt(const std::function<void>& callback)
+    {
+      auto& exti = ExternalInterruptController::getInstance();
+      exti.enableInterrupt<Gpio<port, pin>, Edge>(callback);
+    }
+
+    void disableInterrupt()
+    {
+      auto& exti = ExternalInterruptController::getInstance();
+      exti.disableInterrupt<Gpio<port, pin>>();
     }
 
     void setMode(const GpioMode &mode)

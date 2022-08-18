@@ -494,7 +494,7 @@ namespace Stm32
     void enableCaptureCompareInterrupt(const std::function<void()> &callback)
     {
       validateCaptureCompareChannel<Channel>();
-      IRQn_Type timerIRQn;
+      
       if constexpr (Channel == 1)
       {
         timerInstance_->SR &= ~TIM_SR_CC1IF;
@@ -520,6 +520,7 @@ namespace Stm32
         captureCompareCallback4_ = callback;
       }
 
+      IRQn_Type timerIRQn;
       if constexpr (TimerIndex == 1)
         timerIRQn = TIM1_CC_IRQn;
       else if constexpr (TimerIndex == 2)

@@ -8,6 +8,7 @@ target_sources(${TARGET}
     "include/Gpio.hpp"
     "include/GpioTypes.hpp"
     "include/GpioAlternateFunctions.hpp"
+    "include/ExternalInterruptController.hpp"
     "include/Clock.hpp"
     "include/CycleCounter.hpp"
     "include/GeneralPurposeTimer.hpp"
@@ -15,6 +16,7 @@ target_sources(${TARGET}
   PRIVATE
     "src/Clock.cpp"
     "src/GeneralPurposeTimer.cpp"
+    "src/ExternalInterruptController.cpp"
 )
 
 target_include_directories(${TARGET}

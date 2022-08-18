@@ -10,12 +10,12 @@ namespace Stm32
    * UQFN48 package
    * 
    */
-  enum class Port
+  enum class Port : uint8_t
   {
-    A,
-    B,
-    C,
-    H
+    A = 0,
+    B = 1,
+    C = 2,
+    H = 7
   };
 
   enum class GpioMode : uint8_t
@@ -46,6 +46,13 @@ namespace Stm32
     PullUp = 0b01,
     PullDown = 0b10,
     Reserved = 0b11
+  };
+
+  enum class GpioExternalInterruptEdge : uint8_t
+  {
+    Rising  = 0,
+    Falling = 1,
+    Both    = 2
   };
 
   enum class GpioAlternateFunctionNumber : uint8_t

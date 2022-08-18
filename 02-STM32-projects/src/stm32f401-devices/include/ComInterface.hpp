@@ -6,18 +6,14 @@
 
 namespace Stm32
 {
-
-  struct ComConfig {};
-
   class ComInterface
   {
     public:
       using CallbackT = std::function<void()>;
-      
-      virtual void configure(const ComConfig& config) = 0;
 
-      virtual void asyncRead(std::byte * const buffer, const size_t bufferSize, size_t& readSize, const CallbackT& callback) = 0;
-      virtual void asyncWrite(const std::byte * const buffer, const size_t bufferSize, size_t& writeSize, const CallbackT& callback) = 0;
+      virtual void setErrorCallback(const CallbackT &callback) = 0;
+      virtual bool asyncRead(std::byte * const buffer, const size_t bufferSize, size_t& readSize, const CallbackT& callback) = 0;
+      virtual bool asyncWrite(const std::byte * const buffer, const size_t bufferSize, size_t& writeSize, const CallbackT& callback) = 0;
 
       size_t read(std::byte * const buffer, const size_t bufferSize)
       {
