@@ -18,4 +18,6 @@ stm32_fetch_cmsis(F4)
 find_package(CMSIS COMPONENTS ${DEVICE} REQUIRED)
 #find_package(HAL COMPONENTS STM32F4 REQUIRED)
 
+find_package(FsmGenerator REQUIRED)
+
 add_subdirectory(src)
