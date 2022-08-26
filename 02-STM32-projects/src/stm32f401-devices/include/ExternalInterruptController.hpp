@@ -2,14 +2,17 @@
 #include <functional>
 #include "GpioTypes.hpp"
 
+
 namespace Stm32
 {
+  extern bool ensureExternalInterruptLink;
   class ExternalInterruptController
   {
     public:
       static ExternalInterruptController& getInstance()
       {
         static ExternalInterruptController instance;
+        ensureExternalInterruptLink = true;
         return instance;
       }
 
@@ -83,7 +86,7 @@ namespace Stm32
         return (EXTI->PR & (1 << pinNumber));
       }
       
-      constexpr IRQn_Type getExtiIRQn(const uint8_t pinNumber)
+      static constexpr IRQn_Type getExtiIRQn(const uint8_t pinNumber)
       {
         IRQn_Type extiIRQn = static_cast<IRQn_Type>(-100);
         if (pinNumber == 0)

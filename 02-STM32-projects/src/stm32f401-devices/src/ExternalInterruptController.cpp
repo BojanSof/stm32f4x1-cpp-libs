@@ -2,6 +2,11 @@
 
 namespace Stm32
 {
+  bool ensureExternalInterruptLink = false;
+}
+
+namespace Stm32
+{
   void checkPinInterrupt(const uint8_t pinNumber)
   {
     if((EXTI->PR & (1 << pinNumber)))
