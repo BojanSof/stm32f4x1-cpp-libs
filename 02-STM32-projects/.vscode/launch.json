@@ -76,6 +76,42 @@
     "interface": "swd",
     "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
     "runToEntryPoint": "main"
+  },
+  {
+    "name": "Software Pwm JLink",
+    "type": "cortex-debug",
+    "request": "launch",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/software-pwm/Debug/software-pwm.elf",
+    "servertype": "jlink",
+    "device": "STM32F401CC",
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
+  },
+  {
+    "name": "External Interrupt JLink",
+    "type": "cortex-debug",
+    "request": "launch",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/external-interrupt/Debug/external-interrupt.elf",
+    "servertype": "jlink",
+    "device": "STM32F401CC",
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
+  },
+  {
+    "name": "Serial Eeprom JLink",
+    "type": "cortex-debug",
+    "request": "launch",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/serial-eeprom/Debug/serial-eeprom.elf",
+    "servertype": "jlink",
+    "device": "STM32F401CC",
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
   }
   ]
 }
