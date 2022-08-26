@@ -12,11 +12,13 @@ target_sources(${TARGET}
     "include/Clock.hpp"
     "include/CycleCounter.hpp"
     "include/GeneralPurposeTimer.hpp"
-    "include/ComInterface.hpp"    
+    "include/ComInterface.hpp"
+    "include/I2C.hpp"
   PRIVATE
     "src/Clock.cpp"
     "src/GeneralPurposeTimer.cpp"
-    "src/ExternalInterruptController.cpp"    
+    "src/ExternalInterruptController.cpp"
+    "src/I2C.cpp"    
 )
 
 target_include_directories(${TARGET}
