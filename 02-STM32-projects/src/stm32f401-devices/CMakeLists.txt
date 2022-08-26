@@ -12,11 +12,11 @@ target_sources(${TARGET}
     "include/Clock.hpp"
     "include/CycleCounter.hpp"
     "include/GeneralPurposeTimer.hpp"
-    "include/ComInterface.hpp"
+    "include/ComInterface.hpp"    
   PRIVATE
     "src/Clock.cpp"
     "src/GeneralPurposeTimer.cpp"
-    "src/ExternalInterruptController.cpp"
+    "src/ExternalInterruptController.cpp"    
 )
 
 target_include_directories(${TARGET}
@@ -32,6 +32,7 @@ target_compile_features(${TARGET}
 
 target_link_libraries(${TARGET}
   PUBLIC
+    #cfsm-generator
     CMSIS::STM32::F401CC
     STM32::NoSys
     STM32::Nano)
