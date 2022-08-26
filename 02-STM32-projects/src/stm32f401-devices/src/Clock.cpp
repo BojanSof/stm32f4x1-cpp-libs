@@ -28,6 +28,8 @@ namespace Stm32
 
     // Enable Cycle Counter, which is used as a steady clock and also for delays
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    ITM->LAR = 0xc5acce55;
+    DWT->CYCCNT = 0;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
   }
 }

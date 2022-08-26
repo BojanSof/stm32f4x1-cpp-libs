@@ -46,7 +46,7 @@ namespace Stm32
     }
 
     template<GpioExternalInterruptEdge Edge>
-    void enableInterrupt(const std::function<void>& callback)
+    void enableInterrupt(const std::function<void()>& callback)
     {
       auto& exti = ExternalInterruptController::getInstance();
       exti.enableInterrupt<Gpio<port, pin>, Edge>(callback);

@@ -5,7 +5,8 @@
 
 namespace Stm32
 {
-  inline constexpr uint32_t CoreFrequency = 84000000; // Hz
+  inline constexpr uint32_t CoreFrequency = 84000000U; // Hz
+  inline constexpr uint32_t Pclk1Frequency = 42000000U; // Hz, APB1 clock
   void deviceInit();
 }
 

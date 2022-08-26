@@ -176,7 +176,7 @@ namespace Stm32
   constexpr bool gpioCheckAlternateFunction(const GpioAlternateFunctionId& af)
   {
     using GpioAfType = GpioAlternateFunction<port, pin>;
-    for(const auto &gpioAf : GpioAfType::types_)
+    for(const auto &gpioAf : GpioAfType::types)
     {
       if(gpioAf == static_cast<typename GpioAfType::Type>(af)) return true;
     }
@@ -339,7 +339,7 @@ namespace Stm32
       Default       =   static_cast<uint16_t>(GpioAlternateFunctionId::Default),
       TIM1_CH3      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM1_CH3),
       USART1_RX     =   static_cast<uint16_t>(GpioAlternateFunctionId::USART1_RX),
-      OTG_FS_ID   =   static_cast<uint16_t>(GpioAlternateFunctionId::OTG_FS_ID),
+      OTG_FS_ID     =   static_cast<uint16_t>(GpioAlternateFunctionId::OTG_FS_ID),
       EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
     };
 
@@ -464,11 +464,11 @@ namespace Stm32
       SPI1_SCK      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_SCK),
       SPI3_SCK      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_SCK),
       I2S3_CK       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3_CK),
-      I2C2_SDA_AF9  =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C2_SDA_AF9),
+      I2C2_SDA      =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C2_SDA_AF9),
       EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
     };
 
-    static constexpr Type types[] = {Default, JTDO_SWO, TIM2_CH2, SPI1_SCK, SPI3_SCK, I2S3_CK, I2C2_SDA_AF9, EVENT_OUT};
+    static constexpr Type types[] = {Default, JTDO_SWO, TIM2_CH2, SPI1_SCK, SPI3_SCK, I2S3_CK, I2C2_SDA, EVENT_OUT};
   };
   template<>
   struct GpioAlternateFunction<Port::B, 4>
@@ -480,12 +480,12 @@ namespace Stm32
       TIM3_CH1       =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM3_CH1),
       SPI1_MISO      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_MISO),
       SPI3_MISO      =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_MISO),
-      I2S3ext_SD_AF7 =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3ext_SD_AF7),
-      I2C3_SDA_AF9   =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C3_SDA_AF9),
+      I2S3ext_SD     =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3ext_SD_AF7),
+      I2C3_SDA       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C3_SDA_AF9),
       EVENT_OUT      =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
     };
 
-    static constexpr Type types[] = {Default, JTRST, TIM3_CH1, SPI1_MISO, SPI3_MISO, I2S3ext_SD_AF7, I2C3_SDA_AF9, EVENT_OUT};
+    static constexpr Type types[] = {Default, JTRST, TIM3_CH1, SPI1_MISO, SPI3_MISO, I2S3ext_SD, I2C3_SDA, EVENT_OUT};
   };
   
   template<>
@@ -497,12 +497,12 @@ namespace Stm32
       TIM3_CH2      =   static_cast<uint16_t>(GpioAlternateFunctionId::TIM3_CH2),
       I2C1_SMBA     =   static_cast<uint16_t>(GpioAlternateFunctionId::I2C1_SMBA),
       SPI1_MOSI     =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI1_MOSI),
-      SPI3_MOSI_AF6 =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_MOSI_AF6),
-      I2S3_SD_AF6   =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3_SD_AF6),
+      SPI3_MOSI     =   static_cast<uint16_t>(GpioAlternateFunctionId::SPI3_MOSI_AF6),
+      I2S3_SD       =   static_cast<uint16_t>(GpioAlternateFunctionId::I2S3_SD_AF6),
       EVENT_OUT     =   static_cast<uint16_t>(GpioAlternateFunctionId::EVENTOUT)
     };
 
-    static constexpr Type types[] = {Default, TIM3_CH2, I2C1_SMBA, SPI1_MOSI, SPI3_MOSI_AF6, I2S3_SD_AF6, EVENT_OUT};
+    static constexpr Type types[] = {Default, TIM3_CH2, I2C1_SMBA, SPI1_MOSI, SPI3_MOSI, I2S3_SD, EVENT_OUT};
   };
 
   template<>
