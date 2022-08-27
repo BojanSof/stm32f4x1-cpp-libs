@@ -11,17 +11,17 @@ int main()
 {
   deviceInit();
 
-  Gpio<Port::A, 6> triggerPin;
-  triggerPin.setAlternateFunction(GpioAlternateFunctionNumber::Af2);
+  using TriggerPin = Pins::PA6;
+  using EchoPin = Pins::PB0;
   Gpio<Port::B, 0> echoPin;
-  echoPin.setAlternateFunction(GpioAlternateFunctionNumber::Af2);
 
   auto& timer = GeneralPurposeTimer<3>::getInstance();
 
   using PwmConfig = PwmModeConfig<50000,
                                   10,
                                   true,
-                                  false>;
+                                  false,
+                                  TriggerPin>;
   timer.configureCaptureCompareChannel<1, PwmConfig>();
  
 
@@ -29,13 +29,15 @@ int main()
                                             TimerCaptureCompareSelection::InputTiChannel,
                                             TimerDigitalFilter::NoFilter,
                                             TimerCapturePolarity::RisingEdge,
-                                            TimerCapturePrescaler::Div1>;
+                                            TimerCapturePrescaler::Div1,
+                                            EchoPin>;
 
   using CaptureConfig2 = InputCaptureConfig<50000,
                                             TimerCaptureCompareSelection::InputTiOther,
                                             TimerDigitalFilter::NoFilter,
                                             TimerCapturePolarity::FallingEdge,
-                                            TimerCapturePrescaler::Div1>;
+                                            TimerCapturePrescaler::Div1,
+                                            EchoPin>;
 
   timer.configureCaptureCompareChannel<3, CaptureConfig1>();
   timer.configureCaptureCompareChannel<4, CaptureConfig2>();

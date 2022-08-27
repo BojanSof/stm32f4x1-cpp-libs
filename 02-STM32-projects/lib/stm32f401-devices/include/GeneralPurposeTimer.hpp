@@ -5,6 +5,8 @@
 
 #include <stm32f4xx.h>
 #include <Clock.hpp>
+#include <Gpio.hpp>
+
 
 namespace Stm32
 {
@@ -122,7 +124,8 @@ namespace Stm32
       uint32_t Period
       , uint32_t DutyCycle
       , bool OutputEnable
-      , bool Polarity>
+      , bool Polarity
+      , typename OutputPinT>
   struct PwmModeConfig : public TimerModeConfig<
                                   TimerMode::PwmOutput,
                                   TimerDirection::Up,
@@ -132,6 +135,7 @@ namespace Stm32
     static constexpr auto dutyCycle = DutyCycle;
     static constexpr auto outputEnable = OutputEnable;
     static constexpr auto polarity = Polarity;
+    using outputPinT = OutputPinT;
   };
 
   /**
@@ -150,7 +154,8 @@ namespace Stm32
       , TimerCaptureCompareSelection InputSelection
       , TimerDigitalFilter InputFilter
       , TimerCapturePolarity EdgeTrigger
-      , TimerCapturePrescaler Prescaler>
+      , TimerCapturePrescaler Prescaler
+      , typename InputPinT>
   struct InputCaptureConfig : public TimerModeConfig<
                                       TimerMode::InputCapture,
                                       TimerDirection::Up,
@@ -166,6 +171,7 @@ namespace Stm32
     static constexpr auto inputFilter = InputFilter;
     static constexpr auto edgeTrigger = EdgeTrigger;
     static constexpr auto prescaler = Prescaler;
+    using inputPinT = InputPinT;
   };
 
   /**
@@ -375,6 +381,8 @@ namespace Stm32
         setPwmMode<Channel>();
         setOutputPolarity<Channel, config.polarity>();
         enableCaptureCompare<Channel, config.outputEnable>();
+        using TimerPinT = typename ConfigT::outputPinT;
+        configurePins<config.mode, Channel, TimerPinT>();
       }
       else if constexpr (config.mode == TimerMode::InputCapture)
       {
@@ -384,7 +392,10 @@ namespace Stm32
         setPrescaler<Channel, config.prescaler>();
         setEdgeTrigger<Channel, config.edgeTrigger>();
         enableCaptureCompare<Channel, true>();
+        using TimerPinT = typename ConfigT::inputPinT;
+        configurePins<config.mode, Channel, TimerPinT>();
       }
+      
     }
 
     /**
@@ -910,7 +921,7 @@ namespace Stm32
       }
     }
 
-    constexpr static TIM_TypeDef *getTimerInstance(const uint8_t timerIndex)
+    static constexpr TIM_TypeDef *getTimerInstance(const uint8_t timerIndex)
     {
       switch (timerIndex)
       {
@@ -958,6 +969,59 @@ namespace Stm32
       {
         static_assert((Channel == 1), "Invalid capture/compare channel specified for TIM10-TIM11");
       }
+    }
+
+    template<TimerMode Mode, uint8_t Channel, typename PinT>
+    static constexpr void configurePins()
+    {
+      if constexpr (TimerIndex == 1)
+      {
+      }
+      else if constexpr (TimerIndex == 2)
+      {
+        GpioAlternateFunctionId afs[] = {
+                            GpioAlternateFunctionId::TIM2_CH1
+                          , GpioAlternateFunctionId::TIM2_CH2
+                          , GpioAlternateFunctionId::TIM2_CH3
+                          , GpioAlternateFunctionId::TIM2_CH4};
+        static_assert(gpioCheckAlternateFunction<PinT::pinPort, PinT::pinNumber>(afs[Channel - 1]), "Invalid timer pin.");
+        PinT pin;
+        pin.setAlternateFunction(afs[Channel - 1]);
+      }
+      else if constexpr (TimerIndex == 3)
+      {
+        GpioAlternateFunctionId afs[] = {
+                            GpioAlternateFunctionId::TIM3_CH1
+                          , GpioAlternateFunctionId::TIM3_CH2
+                          , GpioAlternateFunctionId::TIM3_CH3
+                          , GpioAlternateFunctionId::TIM3_CH4};
+        static_assert(gpioCheckAlternateFunction<PinT::pinPort, PinT::pinNumber>(afs[Channel - 1]), "Invalid timer pin.");
+        PinT pin;
+        pin.setAlternateFunction(afs[Channel - 1]);
+      }
+      else if constexpr (TimerIndex == 4)
+      {
+        GpioAlternateFunctionId afs[] = {
+                            GpioAlternateFunctionId::TIM4_CH1
+                          , GpioAlternateFunctionId::TIM4_CH2
+                          , GpioAlternateFunctionId::TIM4_CH3
+                          , GpioAlternateFunctionId::TIM4_CH4};
+        static_assert(gpioCheckAlternateFunction<PinT::pinPort, PinT::pinNumber>(afs[Channel - 1]), "Invalid timer pin.");
+        PinT pin;
+        pin.setAlternateFunction(afs[Channel - 1]);
+      }
+      else if constexpr (TimerIndex == 5)
+      {
+        GpioAlternateFunctionId afs[] = {
+                            GpioAlternateFunctionId::TIM5_CH1
+                          , GpioAlternateFunctionId::TIM5_CH2
+                          , GpioAlternateFunctionId::TIM5_CH3
+                          , GpioAlternateFunctionId::TIM5_CH4};
+        static_assert(gpioCheckAlternateFunction<PinT::pinPort, PinT::pinNumber>(afs[Channel - 1]), "Invalid timer pin.");
+        PinT pin;
+        pin.setAlternateFunction(afs[Channel - 1]);
+      }
+
     }
 
   private:
