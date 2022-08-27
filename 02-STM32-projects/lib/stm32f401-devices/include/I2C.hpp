@@ -11,6 +11,17 @@
 namespace Stm32
 {
   extern bool ensureI2CLink; //< ensure that the source file with the IRQ handlers is linked
+  
+  /**
+   * @brief Type holding required information
+   * for configuring the MCU I2C interface
+   * as master to communicate with a slave
+   * 
+   * @tparam ClockFrequency The I2C clock frequency
+   * @tparam SlaveAddress The 7-bit address of the slave
+   * @tparam SdaPin SDA pin
+   * @tparam SclPin SCL pin
+   */
   template <
     uint32_t ClockFrequency
     , uint8_t SlaveAddress
@@ -24,6 +35,12 @@ namespace Stm32
     using sclPin = SclPin;
   };
 
+  /**
+   * @brief Interface for I2C peripheral.
+   * Currently supports master mode only.
+   * 
+   * @tparam I2Cindex The number of the I2C instance.
+   */
   template < uint8_t I2Cindex >
   class I2C : public ComInterface
   {
@@ -48,7 +65,7 @@ namespace Stm32
        * @param config I2C config
        */
       template<typename I2CconfigT>
-      void configure(const I2CconfigT& config)
+      void configure(const I2CconfigT& config = I2CconfigT())
       {
         // store the slave address
         slaveAddress_ = config.slaveAddress;
@@ -233,6 +250,17 @@ namespace Stm32
       {
         i2cInstance_->CR1 &= ~I2C_CR1_PE;
       }
+
+      /**
+       * Reset the I2C peripheral
+       * 
+       */
+      void reset()
+      {
+        i2cInstance_->CR1 |= I2C_CR1_SWRST;
+        transferCallback_ = nullptr;
+        errorCallback_ = nullptr;
+      }
     private:
       I2C()
       {
@@ -257,6 +285,8 @@ namespace Stm32
           eventIrqNumber = I2C3_EV_IRQn;
           errorIrqNumber = I2C3_ER_IRQn;
         }
+        // reset I2C peripheral
+        reset();
         i2cInstance_->CR2 &= ~(0x3F << I2C_CR2_FREQ_Pos);
         i2cInstance_->CR2 |= (Pclk1Frequency / 1000000U) << I2C_CR2_FREQ_Pos;
         i2cInstance_->FLTR &= ~(0xF << I2C_FLTR_DNF_Pos);
