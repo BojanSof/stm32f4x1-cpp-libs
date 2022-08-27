@@ -67,6 +67,54 @@ namespace Stm32
       template<typename I2CconfigT>
       void configure(const I2CconfigT& config = I2CconfigT())
       {
+        /** @note The I2C module on this MCU locks with
+         * BUSY = 1 if the pins are not configured before enabling
+         * clock for the interface.
+         */
+        // turn peripheral off
+        disable();
+        // turn off clock for the peripheral
+        if constexpr(I2Cindex == 1)
+        {
+          RCC->APB1ENR &= ~RCC_APB1ENR_I2C1EN;
+        }
+        else if constexpr(I2Cindex == 2)
+        {
+          RCC->APB1ENR &= ~RCC_APB1ENR_I2C2EN;
+        }
+        else if constexpr(I2Cindex == 3)
+        {
+          RCC->APB1ENR &= ~RCC_APB1ENR_I2C3EN;
+        }
+        // configure pins
+        using SdaPinT = typename I2CconfigT::sdaPin;
+        using SclPinT = typename I2CconfigT::sclPin;
+        configurePins<SdaPinT, SclPinT>();
+
+        // turn on the clock and reset the peripheral
+        if constexpr(I2Cindex == 1)
+        {
+          RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
+        }
+        else if constexpr(I2Cindex == 2)
+        {
+          RCC->APB1ENR |= RCC_APB1ENR_I2C2EN;
+        }
+        else if constexpr(I2Cindex == 3)
+        {
+          RCC->APB1ENR |= RCC_APB1ENR_I2C3EN;
+        }  
+        reset();
+        // basic configuration
+        i2cInstance_->FLTR |= I2C_FLTR_ANOFF;  //< analog filter may be problematic, so turn it off
+        i2cInstance_->CR2 &= ~(0x3F << I2C_CR2_FREQ_Pos);
+        i2cInstance_->CR2 |= (Pclk1Frequency / 1000000U) << I2C_CR2_FREQ_Pos;
+        i2cInstance_->FLTR &= ~(0xF << I2C_FLTR_DNF_Pos);
+        i2cInstance_->FLTR |= 0xF << I2C_FLTR_DNF_Pos;
+        i2cInstance_->CR2 |= I2C_CR2_ITBUFEN;
+        i2cInstance_->CR2 |= I2C_CR2_ITEVTEN;
+        i2cInstance_->CR2 |= I2C_CR2_ITERREN;
+
         // store the slave address
         slaveAddress_ = config.slaveAddress;
 
@@ -89,28 +137,6 @@ namespace Stm32
           // configure rise time register (for fm, 300ns)
           i2cInstance_->TRISE |= 13 << I2C_TRISE_TRISE;
         }
-        using SdaPinT = typename I2CconfigT::sdaPin;
-        using SclPinT = typename I2CconfigT::sclPin;
-        static_assert(checkPins<SdaPinT, SclPinT>(), "Invalid I2C pins");
-        SdaPinT sda;
-        SclPinT scl;
-        sda.setOutputType(GpioOutputType::OpenDrain);
-        scl.setOutputType(GpioOutputType::OpenDrain);
-        if constexpr(I2Cindex == 1)
-        {
-          sda.setAlternateFunction(SdaPinT::AlternateFunctions::I2C1_SDA);
-          scl.setAlternateFunction(SclPinT::AlternateFunctions::I2C1_SCL);
-        }
-        else if constexpr(I2Cindex == 2)
-        {
-          sda.setAlternateFunction(SdaPinT::AlternateFunctions::I2C2_SDA);
-          scl.setAlternateFunction(SclPinT::AlternateFunctions::I2C2_SCL);
-        }
-        else if constexpr(I2Cindex == 3)
-        {
-          sda.setAlternateFunction(SdaPinT::AlternateFunctions::I2C3_SDA);
-          scl.setAlternateFunction(SclPinT::AlternateFunctions::I2C3_SCL);
-        }
       }
 
       void setErrorCallback(const CallbackT& callback) final
@@ -121,40 +147,36 @@ namespace Stm32
       bool asyncRead(std::byte * const buffer, const size_t bytesToRead, size_t& actualRead
                       , const CallbackT& callback) final
       {
-        // by default, generate stop condition
-        static constexpr bool doStop = true;
-        return asyncRead(buffer, bytesToRead, actualRead, callback, doStop);
-      }
-
-      bool asyncRead(std::byte * const buffer, const size_t bytesToRead, size_t& actualRead
-                      , const CallbackT& callback, const bool doStop)
-      {
         static size_t iByte = 0;
         if(transferInProgress_) return false;
         iByte = 0;
         ///@todo Check for errors and set actualRead
-        transferCallback_ = [&, bytesToRead, doStop](){
+        transferCallback_ = [this, buffer, bytesToRead, &actualRead, &callback](){
           if(i2cInstance_->SR1 & I2C_SR1_SB)
           {
             // start condition generated, send slave address next
             i2cInstance_->DR = (slaveAddress_ << 1) | 1;
           }
-          else if(i2cInstance_->SR1 & I2C_SR1_ADDR || i2cInstance_->SR1 & I2C_SR1_RXNE)
+          else if(i2cInstance_->SR1 & I2C_SR1_ADDR)
+          {
+            if(bytesToRead == 1)
+            {
+              i2cInstance_->SR1 &= ~I2C_CR1_ACK;
+            }
+            (void)i2cInstance_->SR2;
+            (void)i2cInstance_->DR;
+          }
+          else if(i2cInstance_->SR1 & I2C_SR1_RXNE)
           {
             if(iByte == bytesToRead - 1)
             {
               buffer[iByte++] = static_cast<std::byte>(i2cInstance_->DR);
-            }
-            else if(iByte == bytesToRead)
-            {
-              // no more data left, generate stop condition if requested
-              if(doStop)
-              {
-                i2cInstance_->CR1 |= I2C_CR1_STOP;
-              }
+              // no more data left, generate stop condition
+              i2cInstance_->CR1 |= I2C_CR1_STOP;
               actualRead = iByte;
               // call user callback
               callback();
+              transferInProgress_ = false;
               // disable I2C
               disable();
             }
@@ -166,14 +188,7 @@ namespace Stm32
         };
         // turn on ACK generation only if more than one byte
         // needs to be read
-        if(bytesToRead == 1)
-        {
-          i2cInstance_->SR1 &= ~I2C_CR1_ACK;
-        }
-        else
-        {
-          i2cInstance_->CR1 |= I2C_CR1_ACK;
-        }
+        i2cInstance_->CR1 |= I2C_CR1_ACK;
         // enable peripheral
         enable();
         // generate start condition
@@ -185,37 +200,31 @@ namespace Stm32
       bool asyncWrite(const std::byte * const buffer, const size_t bytesToWrite, size_t& actualWrite
                       , const CallbackT& callback) final
       {
-        // by default, generate stop condition
-        static constexpr bool doStop = true;
-        return asyncWrite(buffer, bytesToWrite, actualWrite, callback, doStop);
-      }
-
-      bool asyncWrite(const std::byte * const buffer, const size_t bytesToWrite, size_t& actualWrite
-                      , const CallbackT& callback, const bool doStop)
-      {
         static size_t iByte = 0;
         if(transferInProgress_) return false;
         iByte = 0;
         ///@todo Check for errors and set actualWrite
-        transferCallback_ = [&, bytesToWrite, doStop](){
+        transferCallback_ = [this, buffer, bytesToWrite, &actualWrite, &callback](){
           if(i2cInstance_->SR1 & I2C_SR1_SB)
           {
             // start condition generated, send slave address next
             i2cInstance_->DR = (slaveAddress_ << 1);
           }
-          else if(i2cInstance_->SR1 & I2C_SR1_ADDR || i2cInstance_->SR1 & I2C_SR1_TXE)
+          else if(i2cInstance_->SR1 & I2C_SR1_ADDR)
           {
             (void)i2cInstance_->SR2;
+            i2cInstance_->DR = static_cast<uint8_t>(buffer[iByte++]);
+          }
+          else if(i2cInstance_->SR1 & I2C_SR1_TXE)
+          {
             if(iByte == bytesToWrite)
             {
               // no more data left, generate stop condition if requested
-              if(doStop)
-              {
-                i2cInstance_->CR1 |= I2C_CR1_STOP;
-              }
+              i2cInstance_->CR1 |= I2C_CR1_STOP;
               actualWrite = iByte;
               // call user callback
               callback();
+              transferInProgress_ = false;
               // disable I2C
               disable();
             }
@@ -258,6 +267,7 @@ namespace Stm32
       void reset()
       {
         i2cInstance_->CR1 |= I2C_CR1_SWRST;
+        i2cInstance_->CR1 &= ~I2C_CR1_SWRST;
         transferCallback_ = nullptr;
         errorCallback_ = nullptr;
       }
@@ -269,31 +279,19 @@ namespace Stm32
         IRQn_Type errorIrqNumber;
         if constexpr(I2Cindex == 1)
         {
-          RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
           eventIrqNumber = I2C1_EV_IRQn;
           errorIrqNumber = I2C1_ER_IRQn;
         }
         else if constexpr(I2Cindex == 2)
         {
-          RCC->APB1ENR |= RCC_APB1ENR_I2C2EN;
           eventIrqNumber = I2C2_EV_IRQn;
           errorIrqNumber = I2C2_ER_IRQn;
         }
         else if constexpr(I2Cindex == 3)
         {
-          RCC->APB1ENR |= RCC_APB1ENR_I2C3EN;
           eventIrqNumber = I2C3_EV_IRQn;
           errorIrqNumber = I2C3_ER_IRQn;
         }
-        // reset I2C peripheral
-        reset();
-        i2cInstance_->CR2 &= ~(0x3F << I2C_CR2_FREQ_Pos);
-        i2cInstance_->CR2 |= (Pclk1Frequency / 1000000U) << I2C_CR2_FREQ_Pos;
-        i2cInstance_->FLTR &= ~(0xF << I2C_FLTR_DNF_Pos);
-        i2cInstance_->FLTR |= 0xF << I2C_FLTR_DNF_Pos;
-        i2cInstance_->CR2 |= I2C_CR2_ITBUFEN;
-        i2cInstance_->CR2 |= I2C_CR2_ITEVTEN;
-        i2cInstance_->CR2 |= I2C_CR2_ITERREN;
         NVIC_ClearPendingIRQ(eventIrqNumber);
         NVIC_EnableIRQ(eventIrqNumber);
         NVIC_ClearPendingIRQ(errorIrqNumber);
@@ -326,13 +324,21 @@ namespace Stm32
       }
 
       template<typename PinSdaT, typename PinSclT>
-      static constexpr bool checkPins()
+      static constexpr void configurePins()
       {
+        PinSdaT sda;
+        PinSclT scl;
+        sda.setOutputType(GpioOutputType::OpenDrain);
+        scl.setOutputType(GpioOutputType::OpenDrain);
+        sda.setPullType(GpioPullType::PullUp);
+        scl.setPullType(GpioPullType::PullUp);
         if constexpr (I2Cindex == 1)
         {
           constexpr bool sdaCorrect = gpioCheckAlternateFunction<PinSdaT::pinPort, PinSdaT::pinNumber>(GpioAlternateFunctionId::I2C1_SDA);
           constexpr bool sclCorrect = gpioCheckAlternateFunction<PinSclT::pinPort, PinSclT::pinNumber>(GpioAlternateFunctionId::I2C1_SCL);
-          return (sdaCorrect && sclCorrect);
+          static_assert(sdaCorrect && sclCorrect, "Invalid I2C pins");
+          sda.setAlternateFunction(PinSdaT::AlternateFunctions::I2C1_SDA);
+          scl.setAlternateFunction(PinSclT::AlternateFunctions::I2C1_SCL);
         }
         else if constexpr (I2Cindex == 2)
         {
@@ -340,7 +346,9 @@ namespace Stm32
                   gpioCheckAlternateFunction<PinSdaT::pinPort, PinSdaT::pinNumber>(GpioAlternateFunctionId::I2C2_SDA_AF4)
                   || gpioCheckAlternateFunction<PinSdaT::pinPort, PinSdaT::pinNumber>(GpioAlternateFunctionId::I2C2_SDA_AF9);
           constexpr bool sclCorrect = gpioCheckAlternateFunction<PinSclT::pinPort, PinSclT::pinNumber>(GpioAlternateFunctionId::I2C2_SCL);
-          return (sdaCorrect && sclCorrect);
+          static_assert(sdaCorrect && sclCorrect, "Invalid I2C pins");
+          sda.setAlternateFunction(PinSdaT::AlternateFunctions::I2C2_SDA);
+          scl.setAlternateFunction(PinSclT::AlternateFunctions::I2C2_SCL);
         }
         else if constexpr (I2Cindex == 3)
         {
@@ -348,13 +356,10 @@ namespace Stm32
                   gpioCheckAlternateFunction<PinSdaT::pinPort, PinSdaT::pinNumber>(GpioAlternateFunctionId::I2C3_SDA_AF4)
                   || gpioCheckAlternateFunction<PinSdaT::pinPort, PinSdaT::pinNumber>(GpioAlternateFunctionId::I2C3_SDA_AF9);
           constexpr bool sclCorrect = gpioCheckAlternateFunction<PinSclT::pinPort, PinSclT::pinNumber>(GpioAlternateFunctionId::I2C3_SCL);
-          return (sdaCorrect && sclCorrect);
+          static_assert(sdaCorrect && sclCorrect, "Invalid I2C pins");
+          sda.setAlternateFunction(PinSdaT::AlternateFunctions::I2C3_SDA);
+          scl.setAlternateFunction(PinSclT::AlternateFunctions::I2C3_SCL);
         }
-        else
-        {
-          return false;
-        }
-
       }
 
       I2C_TypeDef *const i2cInstance_ = getI2Cinstance();
