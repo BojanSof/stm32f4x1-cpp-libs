@@ -20,4 +20,5 @@ find_package(CMSIS COMPONENTS ${DEVICE} REQUIRED)
 
 find_package(FsmGenerator REQUIRED)
 
+add_subdirectory(lib)
 add_subdirectory(src)
