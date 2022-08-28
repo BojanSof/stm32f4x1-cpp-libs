@@ -15,7 +15,7 @@ target_compile_features(${TARGET}
 target_link_libraries(${TARGET}
   PUBLIC
     stm32f401-devices
-    external-devices)
+    sseg-display)
 
 stm32_print_size_of_target(${TARGET})
 stm32_generate_binary_file(${TARGET})

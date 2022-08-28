@@ -13,7 +13,6 @@ int main()
 
   using TriggerPin = Pins::PA6;
   using EchoPin = Pins::PB0;
-  Gpio<Port::B, 0> echoPin;
 
   auto& timer = GeneralPurposeTimer<3>::getInstance();
 
