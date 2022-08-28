@@ -18,6 +18,7 @@ namespace Stm32
    */
   enum class I2Cerror
   {
+    NoError,
     BusError,
     AcknowledgeFailure,
     ArbitrationLost,
@@ -154,7 +155,7 @@ namespace Stm32
 
       void setErrorCallback(const CallbackT& callback) final
       {
-        errorCallback_ = callback;
+        userErrorCallback_ = callback;
       }
 
       bool asyncRead(std::byte * const buffer, const size_t bytesToRead, size_t& actualRead
@@ -162,9 +163,10 @@ namespace Stm32
       {
         static size_t iByte = 0;
         if(transferInProgress_) return false;
+        userTransferCallback_ = callback;
         iByte = 0;
-        ///@todo Check for errors and set actualRead
-        transferCallback_ = [this, buffer, bytesToRead, &actualRead, &callback](){
+        transferCallback_ = [this, buffer, bytesToRead, &actualRead](){
+          errorStatus_ = I2Cerror::NoError;  //< reset error status
           if(i2cInstance_->SR1 & I2C_SR1_SB)
           {
             // start condition generated, send slave address next
@@ -188,7 +190,7 @@ namespace Stm32
               i2cInstance_->CR1 |= I2C_CR1_STOP;
               actualRead = iByte;
               // call user callback
-              callback();
+              if(userTransferCallback_) userTransferCallback_();
               transferInProgress_ = false;
               // disable I2C
               disable();
@@ -196,6 +198,7 @@ namespace Stm32
             else
             {
               buffer[iByte++] = static_cast<std::byte>(i2cInstance_->DR);
+              actualRead = iByte;
             }
           }
         };
@@ -215,9 +218,10 @@ namespace Stm32
       {
         static size_t iByte = 0;
         if(transferInProgress_) return false;
+        userTransferCallback_ = callback;
         iByte = 0;
-        ///@todo Check for errors and set actualWrite
-        transferCallback_ = [this, buffer, bytesToWrite, &actualWrite, &callback](){
+        transferCallback_ = [this, buffer, bytesToWrite, &actualWrite](){
+          errorStatus_ = I2Cerror::NoError;  //< reset error status
           if(i2cInstance_->SR1 & I2C_SR1_SB)
           {
             // start condition generated, send slave address next
@@ -236,7 +240,7 @@ namespace Stm32
               i2cInstance_->CR1 |= I2C_CR1_STOP;
               actualWrite = iByte;
               // call user callback
-              callback();
+              if(userTransferCallback_) userTransferCallback_();
               transferInProgress_ = false;
               // disable I2C
               disable();
@@ -244,6 +248,7 @@ namespace Stm32
             else
             {
               i2cInstance_->DR = static_cast<uint8_t>(buffer[iByte++]);
+              actualWrite = iByte;
             }
           }
         };
@@ -282,10 +287,20 @@ namespace Stm32
         i2cInstance_->CR1 |= I2C_CR1_SWRST;
         i2cInstance_->CR1 &= ~I2C_CR1_SWRST;
         transferCallback_ = nullptr;
-        errorCallback_ = nullptr;
+        errorStatus_ = I2Cerror::NoError;
+      }
+
+      /**
+       * @brief Get the error status value.
+       * 
+       * @return I2Cerror The I2C error.
+       */
+      I2Cerror getErrorStatus()
+      {
+        return errorStatus_;
       }
     private:
-      I2C()
+      I2C() : errorStatus_(I2Cerror::NoError)
       {
         static_assert(I2Cindex == 1 || I2Cindex == 2 || I2Cindex == 3, "Invalid I2C instance");
         IRQn_Type eventIrqNumber;
@@ -305,6 +320,36 @@ namespace Stm32
           eventIrqNumber = I2C3_EV_IRQn;
           errorIrqNumber = I2C3_ER_IRQn;
         }
+        // set error callback, which updates error status
+        // and calls user provided error callback
+        errorCallback_ = [this]() {
+          // set error status
+          if (i2cInstance_->SR1 & I2C_SR1_AF)
+          {
+            errorStatus_ = I2Cerror::AcknowledgeFailure;
+          }
+          else if (i2cInstance_->SR1 & I2C_SR1_BERR)
+          {
+            errorStatus_ = I2Cerror::BusError;
+          }
+          else if (i2cInstance_->SR1 & I2C_SR1_OVR)
+          {
+            errorStatus_ = I2Cerror::OverrunUnderrunError;
+          }
+          else if (i2cInstance_->SR1 & I2C_SR1_ARLO)
+          {
+            errorStatus_ = I2Cerror::ArbitrationLost;
+          }
+          // disable I2C peripheral
+          disable();
+          // call user error callback
+          if(userErrorCallback_)
+          {
+            userErrorCallback_();
+          }
+          // erase transfer callback
+          transferCallback_ = nullptr;
+        };
         NVIC_ClearPendingIRQ(eventIrqNumber);
         NVIC_EnableIRQ(eventIrqNumber);
         NVIC_ClearPendingIRQ(errorIrqNumber);
@@ -378,6 +423,9 @@ namespace Stm32
       I2C_TypeDef *const i2cInstance_ = getI2Cinstance();
       uint8_t slaveAddress_;
       volatile bool transferInProgress_ = false;
+      volatile I2Cerror errorStatus_;
+      CallbackT userTransferCallback_;
+      CallbackT userErrorCallback_;
     public:
       inline static CallbackT transferCallback_;
       inline static CallbackT errorCallback_;
