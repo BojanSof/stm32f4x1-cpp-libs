@@ -13,6 +13,18 @@ namespace Stm32
   extern bool ensureI2CLink; //< ensure that the source file with the IRQ handlers is linked
   
   /**
+   * Enumeration holding the possible I2C errors.
+   * Can be used for checking different error conditions.
+   */
+  enum class I2Cerror
+  {
+    BusError,
+    AcknowledgeFailure,
+    ArbitrationLost,
+    OverrunUnderrunError
+  };
+
+  /**
    * @brief Type holding required information
    * for configuring the MCU I2C interface
    * as master to communicate with a slave
@@ -27,7 +39,7 @@ namespace Stm32
     , uint8_t SlaveAddress
     , typename SdaPin
     , typename SclPin>
-  struct I2Cconfig : public ComConfig
+  struct I2Cconfig
   {
     static constexpr uint32_t clockFrequency = ClockFrequency;
     static constexpr uint8_t slaveAddress = SlaveAddress;
@@ -69,7 +81,8 @@ namespace Stm32
       {
         /** @note The I2C module on this MCU locks with
          * BUSY = 1 if the pins are not configured before enabling
-         * clock for the interface.
+         * clock for the interface. The internal pull-ups also
+         * seem to prevent this condition from happening.
          */
         // turn peripheral off
         disable();
