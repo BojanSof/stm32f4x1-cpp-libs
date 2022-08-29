@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-set(TARGET "serial-eeprom")
+set(TARGET "serial-eeprom-example")
 
 add_executable(${TARGET})
 target_sources(${TARGET}
