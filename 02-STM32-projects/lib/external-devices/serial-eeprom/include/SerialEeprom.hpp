@@ -30,7 +30,7 @@ namespace Devices
     public:
       SerialEeprom()
       {
-        static_cast(  MemorySize == 1
+        static_assert(  MemorySize == 1
                   ||  MemorySize == 2
                   ||  MemorySize == 4
                   ||  MemorySize == 8
@@ -67,7 +67,7 @@ namespace Devices
                 SdaPinT,    // SDA pin
                 SclPinT     // SCL pin
               >;
-        i2cInstance.configure<eepromI2Cconfig>();
+        i2cInstance.template configure<eepromI2Cconfig>();
         // write the memory start address
         const std::byte memAddrBuffer[] = {
             static_cast<std::byte>(startAddress >> 8)
@@ -106,7 +106,7 @@ namespace Devices
                 SdaPinT,    // SDA pin
                 SclPinT     // SCL pin
               >;
-        i2cInstance.configure<eepromI2Cconfig>();
+        i2cInstance.template configure<eepromI2Cconfig>();
         // write the address
         const std::byte memAddrBuffer[] = {
             static_cast<std::byte>(startAddress >> 8)
@@ -121,11 +121,13 @@ namespace Devices
         ///@todo utilize page write mode
         using namespace std::chrono_literals;
         static constexpr auto writeDelay= 5ms;  //< max time to write the data, refer to datasheet, write cycle time
+        size_t actualWrite = 0;
         for(size_t iByte = 0; iByte < bytesToWrite; ++iByte)
         {
-          i2cInstance.write(buffer[iByte], 1);
+          actualWrite += i2cInstance.write(&buffer[iByte], 1);
           CycleCounter::delay(writeDelay);
         }
+        return actualWrite;
       }
     private:
       /// check if a given address for the EEPROM is valid
