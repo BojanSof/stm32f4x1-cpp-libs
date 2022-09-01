@@ -107,16 +107,9 @@ namespace Devices
                 SclPinT     // SCL pin
               >;
         i2cInstance.template configure<eepromI2Cconfig>();
-        // write the address
-        const std::byte memAddrBuffer[] = {
-            static_cast<std::byte>(startAddress >> 8)
-          , static_cast<std::byte>(startAddress & 0xFF)
-        };
-        i2cInstance.write(memAddrBuffer, sizeof(memAddrBuffer));
-        if(i2cInstance.getErrorStatus() != I2Cerror::NoError)
-        {
-          return 0;
-        }
+        // address buffer
+        std::byte singleWriteBuffer[2]{};
+        uint16_t currentAddress = startAddress;
         // write the data byte by byte
         ///@todo utilize page write mode
         using namespace std::chrono_literals;
@@ -124,7 +117,16 @@ namespace Devices
         size_t actualWrite = 0;
         for(size_t iByte = 0; iByte < bytesToWrite; ++iByte)
         {
-          actualWrite += i2cInstance.write(&buffer[iByte], 1);
+
+          // write eeprom memory address and single byte data
+          singleWriteBuffer[0] = static_cast<std::byte>(currentAddress >> 8);
+          singleWriteBuffer[1] = static_cast<std::byte>(currentAddress & 0xFF);
+          singleWriteBuffer[2] = buffer[iByte];
+          bool allWritten = (i2cInstance.write(singleWriteBuffer, 3) == 3);
+          if(i2cInstance.getErrorStatus() != I2Cerror::NoError) break;
+          actualWrite += allWritten;
+          currentAddress++;
+          // wait the internal write cycle to finish
           CycleCounter::delay(writeDelay);
         }
         return actualWrite;
