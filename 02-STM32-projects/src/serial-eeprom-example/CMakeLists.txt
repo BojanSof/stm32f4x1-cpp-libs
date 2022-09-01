@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-set(TARGET "serial-eeprom")
+set(TARGET "serial-eeprom-example")
 
 add_executable(${TARGET})
 target_sources(${TARGET}
@@ -15,6 +15,7 @@ target_compile_features(${TARGET}
 target_link_libraries(${TARGET}
   PUBLIC
     stm32f401-devices
+    serial-eeprom
 )
 
 stm32_print_size_of_target(${TARGET})

@@ -106,7 +106,7 @@
     "type": "cortex-debug",
     "request": "launch",
     "cwd": "${workspaceRoot}",
-    "executable": "${workspaceRoot}/build/STM32-projects/src/serial-eeprom/Debug/serial-eeprom.elf",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/serial-eeprom-example/Debug/serial-eeprom-example.elf",
     "servertype": "jlink",
     "device": "STM32F401CC",
     "interface": "swd",

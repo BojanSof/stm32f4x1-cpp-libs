@@ -176,7 +176,7 @@ namespace Stm32
           {
             if(bytesToRead == 1)
             {
-              i2cInstance_->SR1 &= ~I2C_CR1_ACK;
+              i2cInstance_->CR1 &= ~I2C_CR1_ACK;
             }
             (void)i2cInstance_->SR2;
             (void)i2cInstance_->DR;
@@ -199,14 +199,18 @@ namespace Stm32
             {
               buffer[iByte++] = static_cast<std::byte>(i2cInstance_->DR);
               actualRead = iByte;
+              if(iByte == bytesToRead - 1)
+              {
+                // turn off ACK
+                i2cInstance_->CR1 &= ~I2C_CR1_ACK;
+              }
             }
           }
         };
-        // turn on ACK generation only if more than one byte
-        // needs to be read
-        i2cInstance_->CR1 |= I2C_CR1_ACK;
         // enable peripheral
         enable();
+        // turn on ACK generation
+        i2cInstance_->CR1 |= I2C_CR1_ACK;
         // generate start condition
         i2cInstance_->CR1 |= I2C_CR1_START;
         transferInProgress_ = true;
