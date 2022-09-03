@@ -264,6 +264,107 @@ namespace Stm32
         return true;
       }
 
+            /**
+       * @brief Write the bytes from the user-defined buffer
+       * via the communication interface. Before writing the data,
+       * write control bytes or memory address bytes.
+       * After write is done, call the user-passed callback function.
+       * @note This function is non-blocking.
+       * 
+       * @param buffer The buffer which holds the bytes to be written.
+       * @param bytesToWrite The number of bytes to write.
+       * @param controlOrMemAddress The buffer which holds the control bytes
+       * or the memory address bytes.
+       * @param controlOrMemAddressSize The size of the buffer holding the
+       * control bytes or memory address bytes.
+       * @param actualWrite The actual number of bytes that were written.
+       * @param callback The callback function.
+       * @return true The write operation was started successfully.
+       * @return false There is a transfer in progress.
+       */
+      bool asyncWrite(const std::byte * const buffer, const size_t bytesToWrite
+                    , const std::byte * const controlOrMemAddress, const size_t controlOrMemAddressSize
+                    , size_t& actualWrite, const CallbackT& callback)
+      {
+        static size_t iByte = 0;
+        if(transferInProgress_) return false;
+        userTransferCallback_ = callback;
+        iByte = 0;
+        transferCallback_ = [this, controlOrMemAddress, controlOrMemAddressSize
+                            , buffer, bytesToWrite, &actualWrite](){
+          errorStatus_ = I2Cerror::NoError;  //< reset error status
+          if(i2cInstance_->SR1 & I2C_SR1_SB)
+          {
+            // start condition generated, send slave address next
+            i2cInstance_->DR = (slaveAddress_ << 1);
+          }
+          else if(i2cInstance_->SR1 & I2C_SR1_ADDR)
+          {
+            (void)i2cInstance_->SR2;
+            i2cInstance_->DR = static_cast<uint8_t>(controlOrMemAddress[iByte++]);
+          }
+          else if(i2cInstance_->SR1 & I2C_SR1_TXE)
+          {
+            if(iByte == bytesToWrite + controlOrMemAddressSize)
+            {
+              // no more data left, generate stop condition if requested
+              i2cInstance_->CR1 |= I2C_CR1_STOP;
+              actualWrite = iByte;
+              // call user callback
+              if(userTransferCallback_) userTransferCallback_();
+              transferInProgress_ = false;
+              // disable I2C
+              disable();
+            }
+            else
+            {
+              if(iByte >= controlOrMemAddressSize)
+              {
+                i2cInstance_->DR = static_cast<uint8_t>(buffer[iByte++ - controlOrMemAddressSize]);
+              }
+              else
+              {
+                i2cInstance_->DR = static_cast<uint8_t>(controlOrMemAddress[iByte++]);
+              }
+              actualWrite = iByte;
+            }
+          }
+        };
+        // enable peripheral
+        enable();
+        // generate start condition
+        i2cInstance_->CR1 |= I2C_CR1_START;
+        transferInProgress_ = true;
+        return true;
+      }
+
+      /**
+       * @brief Write the bytes from the user-defined buffer, but
+       * first send control or memory address bytes.
+       * @note This function is blocking.
+       * 
+       * @param buffer The buffer which holds the bytes to be written.
+       * @param bytesToWrite The number of bytes to write.
+       * @param controlOrMemAddress The buffer which holds the control bytes
+       * or the memory address bytes.
+       * @param controlOrMemAddressSize The size of the buffer holding the
+       * control bytes or memory address bytes.
+       * @return size_t The actual number of bytes that were written.
+       */
+      size_t write(const std::byte * const buffer, const size_t bytesToWrite
+                  , const std::byte * const controlOrMemAddress, const size_t controlOrMemAddressSize)
+      {
+        size_t writeSize = 0;
+        volatile bool writeDone = false;
+        if(!asyncWrite(buffer, bytesToWrite, controlOrMemAddress, controlOrMemAddressSize
+                      , writeSize, [&writeDone](){ writeDone = true; }))
+        {
+          return 0;
+        }
+        while(!writeDone);
+        return writeSize;
+      }
+
       /**
        * Enable the I2C peripheral
        * 
