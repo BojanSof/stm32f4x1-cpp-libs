@@ -62,7 +62,7 @@ namespace Stm32
        * @param bytesToRead The requested number of bytes to read.
        * @return size_t The number of bytes that were actually read.
        */
-      size_t read(std::byte * const buffer, const size_t bytesToRead)
+      virtual size_t read(std::byte * const buffer, const size_t bytesToRead)
       {
         size_t readSize = 0;
         volatile bool readDone = false;
@@ -70,7 +70,10 @@ namespace Stm32
         {
           return 0;
         }
-        while(!readDone);
+        while(!readDone)
+        {
+          if(errorOccured_) break;
+        }
         return readSize;
       }
 
@@ -83,7 +86,7 @@ namespace Stm32
        * @param bytesToWrite The number of bytes to write.
        * @return size_t The actual number of bytes that were written.
        */
-      size_t write(const std::byte * const buffer, const size_t bytesToWrite)
+      virtual size_t write(const std::byte * const buffer, const size_t bytesToWrite)
       {
         size_t writeSize = 0;
         volatile bool writeDone = false;
@@ -91,9 +94,14 @@ namespace Stm32
         {
           return 0;
         }
-        while(!writeDone);
+        while(!writeDone)
+        {
+          if(errorOccured_) break;
+        }
         return writeSize;
       }
+    protected:
+      bool errorOccured_ = false;
   };
 
 }
