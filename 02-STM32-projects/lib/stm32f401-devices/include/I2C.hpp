@@ -356,8 +356,8 @@ namespace Stm32
       {
         size_t writeSize = 0;
         volatile bool writeDone = false;
-        if(!asyncWrite(buffer, bytesToWrite, controlOrMemAddress, controlOrMemAddressSize
-                      , writeSize, [&writeDone](){ writeDone = true; }))
+        if(!asyncMemWrite(buffer, bytesToWrite, controlOrMemAddress, controlOrMemAddressSize
+                        , writeSize, [&writeDone](){ writeDone = true; }))
         {
           return 0;
         }
