@@ -2,6 +2,7 @@
 #define STM32_I2C_HPP
 
 #include <cstdint>
+#include <tuple>
 #include <stm32f4xx.h>
 
 #include "ComInterface.hpp"
@@ -22,7 +23,8 @@ namespace Stm32
     BusError,
     AcknowledgeFailure,
     ArbitrationLost,
-    OverrunUnderrunError
+    OverrunUnderrunError,
+    StartError
   };
 
   /**
@@ -163,6 +165,8 @@ namespace Stm32
       {
         static size_t iByte = 0;
         if(transferInProgress_) return false;
+        // enable event interrupt
+        enableEventIrq();
         userTransferCallback_ = callback;
         iByte = 0;
         transferCallback_ = [this, buffer, bytesToRead, &actualRead](){
@@ -222,6 +226,8 @@ namespace Stm32
       {
         static size_t iByte = 0;
         if(transferInProgress_) return false;
+        // enable event interrupt
+        enableEventIrq();
         userTransferCallback_ = callback;
         iByte = 0;
         transferCallback_ = [this, buffer, bytesToWrite, &actualWrite](){
@@ -288,6 +294,8 @@ namespace Stm32
       {
         static size_t iByte = 0;
         if(transferInProgress_) return false;
+        // enable event interrupt
+        enableEventIrq();
         userTransferCallback_ = callback;
         iByte = 0;
         transferCallback_ = [this, controlOrMemAddress, controlOrMemAddressSize
@@ -404,27 +412,87 @@ namespace Stm32
       {
         return errorStatus_;
       }
+      
+      ///@{
+      /// Functions that allow easy control of I2C transaction steps
+      /// @note All functions are blocking
+      void startTransaction(bool read, bool ack=true)
+      {
+        if(transferInProgress_) return;  //< return if transfer is in progress
+        disableEventIrq();  //< disable event interrupts
+        enable();  //< enable I2C peripheral
+        if(i2cInstance_->SR1 & I2C_SR2_BUSY)  //< can't generate start condition if busy is set before start
+        {
+          disable();
+          errorStatus_ = I2Cerror::StartError;
+          return;
+        }
+        errorStatus_ == I2Cerror::NoError;
+        // enable ACK if read and if ack is requested
+        if(read && ack) i2cInstance_->CR1 |= I2C_CR1_ACK;
+        i2cInstance_->CR1 |= I2C_CR1_START;  //< generate start condition
+        while(!(i2cInstance_->SR1 & I2C_SR1_SB));  //< wait for start condition to be generated
+        i2cInstance_->DR = (slaveAddress_ << 1 | read);  //< send slave address
+        while(!(i2cInstance_->SR1 & I2C_SR1_ADDR))  //< wait for address to be acknowledged by slave
+        {
+          if (errorStatus_ == I2Cerror::AcknowledgeFailure)  //< stop if NACK
+          {
+            stopTransaction();
+            disable();
+            return;
+          }
+        }
+      }
+
+      void writeBytes(const std::byte * const buffer, const size_t bytesToWrite)
+      {
+        for(size_t iByte = 0; iByte < bytesToWrite; ++iByte)
+        {
+          while(!(i2cInstance_->SR1 & I2C_SR1_TXE))  //< wait for transmit register to empty
+          {
+            if(errorStatus_ != I2Cerror::NoError)  //< stop if error occurs
+            {
+              stopTransaction();
+              disable();
+              return;
+            }
+          }
+          i2cInstance_->DR = static_cast<uint8_t>(buffer[iByte]);  //< send byte
+        }
+      }
+
+      void readBytes(std::byte * const buffer, const size_t bytesToRead)
+      {
+        for(size_t iByte = 0; iByte < bytesToRead; ++iByte)
+        {
+          while(!(i2cInstance_->SR1 & I2C_SR1_RXNE))  //< wait for receive register to empty
+          {
+            if(errorStatus_ != I2Cerror::NoError)  //< stop if error occurs
+            {
+              stopTransaction();
+              disable();
+              return;
+            }
+          }
+          buffer[iByte] = static_cast<std::byte>(i2cInstance_->DR);  //< receive byte
+          if(iByte + 1 == bytesToRead - 1)  //< turn off ACK generation if only one byte is left to receive
+          {
+            i2cInstance_->CR1 &= ~I2C_CR1_ACK;
+          }
+        }
+      }
+
+      void stopTransaction()
+      {
+        i2cInstance_->CR1 |= I2C_CR1_STOP;  //< generate stop condition
+        disable();  //< disable I2C peripheral
+      }
+      ///@}
     private:
       I2C() : errorStatus_(I2Cerror::NoError)
       {
         static_assert(I2Cindex == 1 || I2Cindex == 2 || I2Cindex == 3, "Invalid I2C instance");
-        IRQn_Type eventIrqNumber;
-        IRQn_Type errorIrqNumber;
-        if constexpr(I2Cindex == 1)
-        {
-          eventIrqNumber = I2C1_EV_IRQn;
-          errorIrqNumber = I2C1_ER_IRQn;
-        }
-        else if constexpr(I2Cindex == 2)
-        {
-          eventIrqNumber = I2C2_EV_IRQn;
-          errorIrqNumber = I2C2_ER_IRQn;
-        }
-        else if constexpr(I2Cindex == 3)
-        {
-          eventIrqNumber = I2C3_EV_IRQn;
-          errorIrqNumber = I2C3_ER_IRQn;
-        }
+        auto [eventIrqNumber, errorIrqNumber] = getIrqNumbers();
         // set error callback, which updates error status
         // and calls user provided error callback
         errorCallback_ = [this]() {
@@ -445,6 +513,7 @@ namespace Stm32
           {
             errorStatus_ = I2Cerror::ArbitrationLost;
           }
+          errorOccured_ = true;  //< to break blocking functions
           // disable I2C peripheral
           disable();
           // call user error callback
@@ -523,6 +592,44 @@ namespace Stm32
           sda.setAlternateFunction(PinSdaT::AlternateFunctions::I2C3_SDA);
           scl.setAlternateFunction(PinSclT::AlternateFunctions::I2C3_SCL);
         }
+      }
+
+      static constexpr auto getIrqNumbers()
+      {
+        IRQn_Type eventIrqNumber;
+        IRQn_Type errorIrqNumber;
+        if constexpr(I2Cindex == 1)
+        {
+          eventIrqNumber = I2C1_EV_IRQn;
+          errorIrqNumber = I2C1_ER_IRQn;
+        }
+        else if constexpr(I2Cindex == 2)
+        {
+          eventIrqNumber = I2C2_EV_IRQn;
+          errorIrqNumber = I2C2_ER_IRQn;
+        }
+        else if constexpr(I2Cindex == 3)
+        {
+          eventIrqNumber = I2C3_EV_IRQn;
+          errorIrqNumber = I2C3_ER_IRQn;
+        }
+        return std::tie(eventIrqNumber, errorIrqNumber);
+      }
+
+      void enableEventIrq()
+      {
+        auto [eventIrqNumber, errorIrqNumber] = getIrqNumbers();
+        if(!NVIC_GetEnableIRQ(eventIrqNumber))
+        {
+          NVIC_ClearPendingIRQ(eventIrqNumber);
+          NVIC_EnableIRQ(eventIrqNumber);
+        }
+      }
+
+      void disableEventIrq()
+      {
+        auto [eventIrqNumber, errorIrqNumber] = getIrqNumbers();
+        NVIC_DisableIRQ(eventIrqNumber);
       }
 
       I2C_TypeDef *const i2cInstance_ = getI2Cinstance();
