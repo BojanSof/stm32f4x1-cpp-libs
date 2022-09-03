@@ -264,7 +264,7 @@ namespace Stm32
         return true;
       }
 
-            /**
+      /**
        * @brief Write the bytes from the user-defined buffer
        * via the communication interface. Before writing the data,
        * write control bytes or memory address bytes.
@@ -282,9 +282,9 @@ namespace Stm32
        * @return true The write operation was started successfully.
        * @return false There is a transfer in progress.
        */
-      bool asyncWrite(const std::byte * const buffer, const size_t bytesToWrite
-                    , const std::byte * const controlOrMemAddress, const size_t controlOrMemAddressSize
-                    , size_t& actualWrite, const CallbackT& callback)
+      bool asyncMemWrite(const std::byte * const buffer, const size_t bytesToWrite
+                        , const std::byte * const controlOrMemAddress, const size_t controlOrMemAddressSize
+                        , size_t& actualWrite, const CallbackT& callback)
       {
         static size_t iByte = 0;
         if(transferInProgress_) return false;
@@ -351,7 +351,7 @@ namespace Stm32
        * control bytes or memory address bytes.
        * @return size_t The actual number of bytes that were written.
        */
-      size_t write(const std::byte * const buffer, const size_t bytesToWrite
+      size_t memWrite(const std::byte * const buffer, const size_t bytesToWrite
                   , const std::byte * const controlOrMemAddress, const size_t controlOrMemAddressSize)
       {
         size_t writeSize = 0;
