@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <Gpio.hpp>
 
-namespace Devices{
+namespace Devices
+{
 
 using namespace Stm32;
 
