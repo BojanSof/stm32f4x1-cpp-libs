@@ -20,4 +20,5 @@ target_compile_features(${TARGET}
 target_link_libraries(${TARGET}
   INTERFACE
     stm32f401-devices
+    embedded-gfx
 )

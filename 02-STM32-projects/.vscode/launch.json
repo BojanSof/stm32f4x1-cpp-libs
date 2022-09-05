@@ -112,6 +112,18 @@
     "interface": "swd",
     "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
     "runToEntryPoint": "main"
+  },
+  {
+    "name": "OLED Display example JLink",
+    "type": "cortex-debug",
+    "request": "launch",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/oled-display-example/Debug/oled-display-example.elf",
+    "servertype": "jlink",
+    "device": "STM32F401CC",
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
   }
   ]
 }

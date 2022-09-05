@@ -19,6 +19,7 @@ find_package(CMSIS COMPONENTS ${DEVICE} REQUIRED)
 #find_package(HAL COMPONENTS STM32F4 REQUIRED)
 
 find_package(FsmGenerator REQUIRED)
+find_package(EmbeddedGfx REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(src)

@@ -151,7 +151,7 @@ namespace Stm32
           i2cInstance_->CCR &= ~I2C_CCR_DUTY;
           i2cInstance_->CCR |= (Pclk1Frequency / (3 * config.clockFrequency)) << I2C_CCR_CCR_Pos;
           // configure rise time register (for fm, 300ns)
-          i2cInstance_->TRISE |= 13 << I2C_TRISE_TRISE;
+          i2cInstance_->TRISE |= 13 << I2C_TRISE_TRISE_Pos;
         }
       }
 
@@ -369,7 +369,11 @@ namespace Stm32
         {
           return 0;
         }
-        while(!writeDone);
+        while(!writeDone)
+        {
+          if(errorOccured_) break;
+        }
+        errorOccured_ = false;
         return writeSize;
       }
 
@@ -388,6 +392,12 @@ namespace Stm32
        */
       void disable()
       {
+        if(transferInProgress_)
+        {
+          // generate stop
+          i2cInstance_->CR1 |= I2C_CR1_STOP;
+          transferInProgress_ = false;
+        }
         i2cInstance_->CR1 &= ~I2C_CR1_PE;
       }
 
@@ -401,6 +411,7 @@ namespace Stm32
         i2cInstance_->CR1 &= ~I2C_CR1_SWRST;
         transferCallback_ = nullptr;
         errorStatus_ = I2Cerror::NoError;
+        errorOccured_ = false;
       }
 
       /**
@@ -523,6 +534,8 @@ namespace Stm32
           }
           // erase transfer callback
           transferCallback_ = nullptr;
+          // disable I2C event interrupt
+          disableEventIrq();
         };
         NVIC_ClearPendingIRQ(eventIrqNumber);
         NVIC_EnableIRQ(eventIrqNumber);
@@ -613,7 +626,7 @@ namespace Stm32
           eventIrqNumber = I2C3_EV_IRQn;
           errorIrqNumber = I2C3_ER_IRQn;
         }
-        return std::tie(eventIrqNumber, errorIrqNumber);
+        return std::make_tuple(eventIrqNumber, errorIrqNumber);
       }
 
       void enableEventIrq()

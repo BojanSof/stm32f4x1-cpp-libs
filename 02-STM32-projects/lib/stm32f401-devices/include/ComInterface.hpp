@@ -74,6 +74,7 @@ namespace Stm32
         {
           if(errorOccured_) break;
         }
+        errorOccured_ = false;
         return readSize;
       }
 
@@ -98,6 +99,7 @@ namespace Stm32
         {
           if(errorOccured_) break;
         }
+        errorOccured_ = false;
         return writeSize;
       }
     protected:
