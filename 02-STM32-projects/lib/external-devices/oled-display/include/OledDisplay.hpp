@@ -49,6 +49,16 @@ namespace Devices
         errNum += (status != true);
         // 4. The column and page start and end addresses are fine for 128x64 display
         ///@todo make this changable based on display size
+        cmdBuffer[0] = SSD1306_SET_PAGE_ADDR;
+        cmdBuffer[1] = 0;
+        cmdBuffer[2] = 7;
+        status = writeCommand(cmdBuffer, 3);
+        errNum += (status != true);
+        cmdBuffer[0] = SSD1306_SET_COL_ADDR;
+        cmdBuffer[1] = 0;
+        cmdBuffer[2] = 127;
+        status = writeCommand(cmdBuffer, 3);
+        errNum += (status != true);
         // 5. Set display offset to 0
         cmdBuffer[0] = SSD1306_SET_DISPLAY_OFFSET;
         cmdBuffer[1] = 0x00;
@@ -125,6 +135,22 @@ namespace Devices
       CanvasT& getCanvas() { return canvas_; }
 
     private:
+      void resetColumnAndPageAddresses()
+      {
+        uint8_t cmdBuffer[3]{};
+        bool status = 0;
+        uint8_t errNum = 0;
+        cmdBuffer[0] = SSD1306_SET_PAGE_ADDR;
+        cmdBuffer[1] = 0;
+        cmdBuffer[2] = 7;
+        status = writeCommand(cmdBuffer, 3);
+        errNum += (status != true);
+        cmdBuffer[0] = SSD1306_SET_COL_ADDR;
+        cmdBuffer[1] = 0;
+        cmdBuffer[2] = 127;
+        status = writeCommand(cmdBuffer, 3);
+        errNum += (status != true);
+      }
       // functions for cmd and data writing
       bool writeCommand(const uint8_t * const cmd, const size_t size)
       {
@@ -143,6 +169,7 @@ namespace Devices
                                   , SdaPinT
                                   , SclPinT>;
         i2c.template configure<DisplayI2Cconfig>();
+        resetColumnAndPageAddresses();
         i2c.memWrite(reinterpret_cast<const std::byte*>(data), size, reinterpret_cast<const std::byte*>(&SSD1306_CONTROL_DATA_CONT), 1);
         return (i2c.getErrorStatus() == I2Cerror::NoError);
       }
