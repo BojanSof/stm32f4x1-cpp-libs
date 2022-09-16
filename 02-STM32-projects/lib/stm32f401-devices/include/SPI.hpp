@@ -13,6 +13,19 @@
 namespace Stm32
 {
   extern bool ensureSpiLink;  //< ensure that the source file with the IRQ handlers is linked
+
+  /**
+   * Enumeration holding the possible SPI errors.
+   * Can be used for checking different error conditions.
+   */
+  enum class SPIerror
+  {
+    NoError,
+    ModeFaultError,
+    OverrunError,
+    FrameFormatError,
+  };
+
   enum class SpiMode : uint8_t
   {
     Mode0  = 0,
@@ -57,6 +70,11 @@ namespace Stm32
     public:
       using CallbackT = ComInterface::CallbackT;
 
+      void setErrorCallback(const CallbackT &callback)
+      {
+        
+      }
+
       static SPI& getInstance()
       {
         static SPI spi;
@@ -67,24 +85,6 @@ namespace Stm32
       template<typename SPIconfigT>
       void configure(const SPIconfigT& config = SPIconfigT())
       {
-        // turn on clock for the peripheral
-        if constexpr(SpiIndex == 1)
-        {
-          RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
-        }
-        else if constexpr(SpiIndex == 2)
-        {
-          RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
-        }
-        else if constexpr(SpiIndex == 3)
-        {
-          RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;
-        }
-        else if constexpr(SpiIndex == 4)
-        {
-          RCC->APB2ENR |= RCC_APB2ENR_SPI4EN;
-        }
-
         auto log2 = [](uint32_t n) constexpr {
           size_t res = 0;
           for(; n > 1; ++res, n/=2);
@@ -99,14 +99,14 @@ namespace Stm32
         };
 
         // set baud rate
-        constexpr auto pclk = getPclk(SpiIndex);
-        constexpr auto f = config.clockFrequency;        
-        constexpr auto quotient = pclk/f;
-        constexpr auto reminder = pclk - f*quotient;
-        constexpr auto roundedQuotient = quotient + std::ratio_greater_v<
+        static constexpr auto pclk = getPclk(SpiIndex);
+        static constexpr auto f = config.clockFrequency;        
+        static constexpr auto quotient = pclk/f;
+        static constexpr auto reminder = pclk - f*quotient;
+        static constexpr auto roundedQuotient = quotient + std::ratio_greater_v<
                                                       std::ratio<reminder, 1>
                                                   ,   std::ratio<f, 2>>;
-        constexpr auto br = log2(roundedQuotient) - 1;
+        static constexpr auto br = log2(roundedQuotient) - 1;
         spiInstance_->CR1 &= ~SPI_CR1_BR;
         spiInstance_->CR1 |= br << SPI_CR1_BR_Pos;
 
@@ -160,19 +160,21 @@ namespace Stm32
         // hardware ss
         if(config.hardwareSs)
         {
+          spiInstance_->CR1 &= ~SPI_CR1_SSM;
           spiInstance_->CR2 |= SPI_CR2_SSOE;
+          setSsLevel_ = nullptr;
         }
         else
         {
-          spiInstance_->CR2 &= ~SPI_CR2_SSOE;
+          spiInstance_->CR1 |= SPI_CR1_SSM;
+          spiInstance_->CR1 |= SPI_CR1_SSI;
+          setSsLevel_ = [](const bool level){
+            using PinsT = typename SPIconfigT::pinsT;
+            using SsPinT = typename PinsT::ssPin;
+            SsPinT ss;
+            ss.setLevel(level);
+          };
         }
-
-        setSsLevel_ = [](bool level){
-          using PinsT = typename SPIconfigT::pinsT;
-          using SsPinT = typename PinsT::ssPin;
-          SsPinT ss;
-          ss.setLevel(level);
-        };
       }
 
       bool asyncTransfer(std::byte * const bufferRead, const CallbackT& callbackRead
@@ -185,9 +187,9 @@ namespace Stm32
         transferCallback_ = [this, bufferRead, callbackRead, bufferWrite, callbackWrite, bytesToTransfer, &actualTransfer]()
         {
           /// @todo error checking
-          if(spiInstance_->SR & SPI_SR_TXE)
+          if((spiInstance_->CR2 & SPI_CR2_TXEIE) && (spiInstance_->SR & SPI_SR_TXE))
           {
-            if(bufferWrite != nullptr && iWrite < bytesToTransfer)
+            if(iWrite < bytesToTransfer)
             {
               if(frameSize16Bits_)
               {
@@ -199,29 +201,32 @@ namespace Stm32
                 spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite++]);
               }
               actualTransfer = iWrite;
-              if(iWrite == bytesToTransfer)
-              {
-                callbackWrite();
-              }
+            }
+            else if(iWrite == bytesToTransfer)
+            {
+              disableTxIrq();
+              if(callbackWrite) callbackWrite();
             }
           }
-          if(spiInstance_->SR & SPI_SR_RXNE)
+          if((spiInstance_->CR2 & SPI_CR2_RXNEIE) && (spiInstance_->SR & SPI_SR_RXNE))
           {
-            if(bufferRead != nullptr && iRead < bytesToTransfer)
+            if(iRead < bytesToTransfer)
             {
               if(frameSize16Bits_)
               {
                 *reinterpret_cast<uint16_t*>(bufferRead + iRead) = static_cast<uint16_t>(spiInstance_->DR);
+                iRead += sizeof(uint16_t);
               }
               else
               {
                 bufferRead[iRead++] = static_cast<std::byte>(spiInstance_->DR);
               }
               // actualTransfer = iRead;
-              if(iRead == bytesToTransfer)
-              {
-                callbackRead();
-              }
+            }
+            else if(iRead == bytesToTransfer)
+            {
+              disableRxIrq();
+              if(callbackRead) callbackRead();
             }
           }
           
@@ -229,36 +234,62 @@ namespace Stm32
           bool readFinished = (bufferRead != nullptr && iRead == bytesToTransfer) || (bufferRead == nullptr);
           if(writeFinished && readFinished)
           {
-            transferInProgress_ = false;
-            // set SS high
-            setSsLevel_(true);
+            // if using software SS
+            if(setSsLevel_)
+            {
+              // set SS high
+              setSsLevel_(true);
+            }
             disable();
+            transferInProgress_ = false;
           }
         };
+        
         // start clock
         enable();
-        // set SS low
-        setSsLevel_(false);
+        // if using software SS
+        if(setSsLevel_)
+        {
+          // set SS low
+          setSsLevel_(false);
+        }
+        // send initial data to kick-start transfer
+        if(bufferWrite != nullptr)
+        {
+          if(frameSize16Bits_)
+          {
+            spiInstance_->DR = *reinterpret_cast<const uint16_t*>(bufferWrite + iWrite);
+            iWrite += sizeof(uint16_t);
+          }
+          else
+          {
+            spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite++]);
+          }
+          actualTransfer = iWrite;
+        }
+        transferInProgress_ = true;
+        if(bufferRead != nullptr)
+        {
+          enableRxIrq();
+        }
 
         if(bufferWrite != nullptr)
         {
-          spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite++]);
+          enableTxIrq();
         }
-        transferInProgress_ = true;
         return true;                
       }
 
-      bool transfer(std::byte * const bufferRead, const std::byte * const bufferWrite, const size_t bytesToTransfer)
+      size_t transfer(std::byte * const bufferRead, const std::byte * const bufferWrite, const size_t bytesToTransfer)
       {
         size_t bytesTransfered = 0;
-        volatile bool transferDone = false;
-        if(!asyncTransfer(bufferRead, [&transferDone](){ transferDone = true; }
-                        , bufferWrite, [&transferDone](){ transferDone = true; }
+        if(!asyncTransfer(bufferRead, nullptr
+                        , bufferWrite, nullptr
                         , bytesToTransfer, bytesTransfered))
         {
           return 0;
         }
-        while(!transferDone)
+        while(transferInProgress_)
         {
           /// @todo upgrade for errors
         }
@@ -267,12 +298,12 @@ namespace Stm32
 
       bool asyncRead(std::byte * const buffer, const size_t bytesToRead, size_t& actualRead, const CallbackT& callback) final
       {
-        return asyncTransfer(buffer, callback, nullptr, nullptr, bytesToRead, actualRead);
+        return asyncTransfer(buffer, callback, nullptr, {}, bytesToRead, actualRead);
       }
 
       bool asyncWrite(const std::byte * const buffer, const size_t bytesToWrite, size_t& actualWrite, const CallbackT& callback) final
       {
-        return asyncTransfer(nullptr, nullptr, buffer, callback, bytesToWrite, actualWrite);
+        return asyncTransfer(nullptr, {}, buffer, callback, bytesToWrite, actualWrite);
       }
 
       void enable()
@@ -289,9 +320,27 @@ namespace Stm32
       SPI()
       {
         static_assert(SpiIndex >= 1 && SpiIndex <= 4, "Invalid SPI instance");
+        
+        // turn on clock for the peripheral
+        if constexpr(SpiIndex == 1)
+        {
+          RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+        }
+        else if constexpr(SpiIndex == 2)
+        {
+          RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
+        }
+        else if constexpr(SpiIndex == 3)
+        {
+          RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;
+        }
+        else if constexpr(SpiIndex == 4)
+        {
+          RCC->APB2ENR |= RCC_APB2ENR_SPI4EN;
+        }
 
         // enable interrupts
-        IRQn_Type irqn = -1;
+        IRQn_Type irqn;
         if constexpr(SpiIndex == 1)
         {
           irqn = SPI1_IRQn;
@@ -310,9 +359,7 @@ namespace Stm32
         }
         NVIC_ClearPendingIRQ(irqn);
         NVIC_EnableIRQ(irqn);
-        spiInstance_->CR2 |= SPI_CR2_ERRIE; //< error interrupt
-        // enable IRQs
-        enableIrqs();
+        // spiInstance_->CR2 |= SPI_CR2_ERRIE; //< error interrupt @todo
       }
       // singleton class
       SPI(const SPI&) = delete;
@@ -320,16 +367,24 @@ namespace Stm32
       void operator=(const SPI&) = delete;
       void operator=(SPI&&) = delete;
 
-      void enableIrqs()
+      void enableTxIrq()
       {
-        spiInstance_->CR2 |= SPI_CR2_RXNEIE;  //< Rx register not empty
         spiInstance_->CR2 |= SPI_CR2_TXEIE;   //< Tx register empty
       }
 
-      void disableIrqs()
+      void disableTxIrq()
+      {
+        spiInstance_->CR2 &= ~SPI_CR2_TXEIE;   //< Tx register empty
+      }
+
+      void enableRxIrq()
+      {
+        spiInstance_->CR2 |= SPI_CR2_RXNEIE;  //< Rx register not empty
+      }
+
+      void disableRxIrq()
       {
         spiInstance_->CR2 &= ~SPI_CR2_RXNEIE;  //< Rx register not empty
-        spiInstance_->CR2 &= ~SPI_CR2_TXEIE;   //< Tx register empty
       }
 
       template<typename PinsT>
@@ -347,6 +402,10 @@ namespace Stm32
         miso.setOutputType(GpioOutputType::PushPull);
         sck.setOutputType(GpioOutputType::PushPull);
         ss.setOutputType(GpioOutputType::PushPull);
+        mosi.setSpeed(GpioSpeed::High);
+        miso.setSpeed(GpioSpeed::High);
+        sck.setSpeed(GpioSpeed::High);
+        ss.setSpeed(GpioSpeed::High);
        
         if constexpr (SpiIndex == 1)
         {
@@ -363,11 +422,11 @@ namespace Stm32
             static_assert(mosiCorrect && misoCorrect && sckCorrect, "Invalid SPI pins");
           }
           mosi.setAlternateFunction(MosiPinT::AlternateFunctions::SPI1_MOSI);
-          miso.setAlternateFunction(MosiPinT::AlternateFunctions::SPI1_MISO);
-          sck.setAlternateFunction(MosiPinT::AlternateFunctions::SPI1_SCK);
+          miso.setAlternateFunction(MisoPinT::AlternateFunctions::SPI1_MISO);
+          sck.setAlternateFunction(SckPinT::AlternateFunctions::SPI1_SCK);
           if (hardwareSs)
           {
-            ss.setAlternateFunction(MosiPinT::AlternateFunctions::SPI1_NSS);
+            ss.setAlternateFunction(SsPinT::AlternateFunctions::SPI1_NSS);
           }
           else
           {
@@ -389,11 +448,11 @@ namespace Stm32
             static_assert(mosiCorrect && misoCorrect && sckCorrect, "Invalid SPI pins");
           }
           mosi.setAlternateFunction(MosiPinT::AlternateFunctions::SPI2_MOSI);
-          miso.setAlternateFunction(MosiPinT::AlternateFunctions::SPI2_MISO);
-          sck.setAlternateFunction(MosiPinT::AlternateFunctions::SPI2_SCK);
+          miso.setAlternateFunction(MisoPinT::AlternateFunctions::SPI2_MISO);
+          sck.setAlternateFunction(SckPinT::AlternateFunctions::SPI2_SCK);
           if (hardwareSs)
           {
-            ss.setAlternateFunction(MosiPinT::AlternateFunctions::SPI2_NSS);
+            ss.setAlternateFunction(SsPinT::AlternateFunctions::SPI2_NSS);
           }
           else
           {
@@ -416,11 +475,11 @@ namespace Stm32
             static_assert(mosiCorrect && misoCorrect && sckCorrect, "Invalid SPI pins");
           }
           mosi.setAlternateFunction(MosiPinT::AlternateFunctions::SPI3_MOSI);
-          miso.setAlternateFunction(MosiPinT::AlternateFunctions::SPI3_MISO);
-          sck.setAlternateFunction(MosiPinT::AlternateFunctions::SPI3_SCK);
+          miso.setAlternateFunction(MisoPinT::AlternateFunctions::SPI3_MISO);
+          sck.setAlternateFunction(SckPinT::AlternateFunctions::SPI3_SCK);
           if (hardwareSs)
           {
-            ss.setAlternateFunction(MosiPinT::AlternateFunctions::SPI3_NSS);
+            ss.setAlternateFunction(SsPinT::AlternateFunctions::SPI3_NSS);
           }
           else
           {
@@ -442,11 +501,11 @@ namespace Stm32
             static_assert(mosiCorrect && misoCorrect && sckCorrect, "Invalid SPI pins");
           }
           mosi.setAlternateFunction(MosiPinT::AlternateFunctions::SPI4_MOSI);
-          miso.setAlternateFunction(MosiPinT::AlternateFunctions::SPI4_MISO);
-          sck.setAlternateFunction(MosiPinT::AlternateFunctions::SPI4_SCK);
+          miso.setAlternateFunction(MisoPinT::AlternateFunctions::SPI4_MISO);
+          sck.setAlternateFunction(SckPinT::AlternateFunctions::SPI4_SCK);
           if (hardwareSs)
           {
-            ss.setAlternateFunction(MosiPinT::AlternateFunctions::SPI4_NSS);
+            ss.setAlternateFunction(SsPinT::AlternateFunctions::SPI4_NSS);
           }
           else
           {
@@ -479,7 +538,7 @@ namespace Stm32
       SPI_TypeDef *const spiInstance_ = getSPIinstance();
       volatile bool transferInProgress_ = false;
       bool frameSize16Bits_ = false;
-      std::function<void(bool)> setSsLevel_;
+      std::function<void(bool)> setSsLevel_ = nullptr;
     public:
       inline static CallbackT transferCallback_;
       inline static CallbackT errorCallback_;

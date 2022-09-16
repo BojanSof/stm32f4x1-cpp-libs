@@ -7,7 +7,7 @@ namespace Stm32
 
 extern "C"
 {
-  void SPI1_Handler()
+  void SPI1_IRQHandler()
   {
     using namespace Stm32;
     if(SPI<1>::transferCallback_)
@@ -16,7 +16,7 @@ extern "C"
     }
   }
 
-  void SPI2_Handler()
+  void SPI2_IRQHandler()
   {
     using namespace Stm32;
     if(SPI<2>::transferCallback_)
@@ -25,7 +25,7 @@ extern "C"
     }
   }
 
-  void SPI3_Handler()
+  void SPI3_IRQHandler()
   {
     using namespace Stm32;
     if(SPI<3>::transferCallback_)
@@ -34,7 +34,7 @@ extern "C"
     }
   }
 
-  void SPI4_Handler()
+  void SPI4_IRQHandler()
   {
     using namespace Stm32;
     if(SPI<4>::transferCallback_)
