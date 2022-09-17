@@ -420,6 +420,8 @@ namespace Stm32
           RCC->APB2RSTR |= RCC_APB2RSTR_SPI4RST;
           RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI4RST;
         }
+        errorStatus_ = SpiError::NoError;
+        errorOccured_ = false;
       }
 
       /**
