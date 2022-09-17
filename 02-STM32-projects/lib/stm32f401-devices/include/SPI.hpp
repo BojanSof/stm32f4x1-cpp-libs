@@ -17,15 +17,19 @@ namespace Stm32
   /**
    * Enumeration holding the possible SPI errors.
    * Can be used for checking different error conditions.
+   * 
    */
-  enum class SPIerror
+  enum class SpiError
   {
     NoError,
     ModeFaultError,
-    OverrunError,
-    FrameFormatError,
+    OverrunError
   };
 
+  /**
+   * SPI modes.
+   * All combinations of (CPOL, CPHA).
+   */
   enum class SpiMode : uint8_t
   {
     Mode0  = 0,
@@ -34,6 +38,14 @@ namespace Stm32
     Mode3  = 3
   };
 
+  /**
+   * @brief Structure holding the SPI pins.
+   * 
+   * @tparam MosiPinT Type of the MOSI pin.
+   * @tparam MisoPinT Type of the MISO pin.
+   * @tparam SckPinT  Type of the SCK pin.
+   * @tparam SsPinT   Type of the SS pin.
+   */
   template<
       typename MosiPinT
     , typename MisoPinT
@@ -47,6 +59,20 @@ namespace Stm32
     using ssPin = SsPinT;
   };
 
+  /**
+   * @brief Structure holding configurations
+   * for the SPI transfer.
+   * 
+   * @tparam ClockFrequency Frequency of the clock.
+   * @note The clock frequency will be rounded to the
+   * closest frequency that is possible to generate.
+   *  
+   * @tparam Mode The SPI mode
+   * @tparam FrameSize16Bits true to use 16-bits frame size.
+   * @tparam LSBfirst Send the least significant bit first.
+   * @tparam PinsT Type holding the SPI pins.
+   * @tparam HardwareSs true to use hardware managed slave select line.
+   */
   template<
       uint32_t ClockFrequency
     , SpiMode Mode
@@ -64,17 +90,22 @@ namespace Stm32
     using pinsT = PinsT;
   };
 
+  /**
+   * @brief Interface for SPI peripheral
+   * 
+   * @tparam SpiIndex The index of the SPI instance.
+   */
   template < uint8_t SpiIndex>
   class SPI : public ComInterface
   {
     public:
       using CallbackT = ComInterface::CallbackT;
 
-      void setErrorCallback(const CallbackT &callback)
-      {
-        
-      }
-
+      /**
+       * @brief Get the SPI instance
+       * 
+       * @return SPI& Reference to the SPI instance
+       */
       static SPI& getInstance()
       {
         static SPI spi;
@@ -82,6 +113,12 @@ namespace Stm32
         return spi;
       }
 
+      /**
+       * @brief Configure the SPI interface with
+       * the specified config
+       * 
+       * @param config SPI config
+       */
       template<typename SPIconfigT>
       void configure(const SPIconfigT& config = SPIconfigT())
       {
@@ -177,6 +214,24 @@ namespace Stm32
         }
       }
 
+      void setErrorCallback(const CallbackT &callback) final
+      {
+        userErrorCallback_ = callback;
+      }
+      
+      /**
+       * @brief Read and write the requested number of data via SPI.
+       * @note This function is non-blocking.
+       * 
+       * @param bufferRead The buffer in which the read data is stored.
+       * @param callbackRead The callback function to call when read is done.
+       * @param bufferWrite The buffer which holds the bytes to be written.
+       * @param callbackWrite The callback function to call when write is done.
+       * @param bytesToTransfer The number of bytes to transfer.
+       * @param actualTransfer The number of bytes that were actually transferred.
+       * @return true Transfer started successfully.
+       * @return false There is a transfer in progress.
+       */
       bool asyncTransfer(std::byte * const bufferRead, const CallbackT& callbackRead
                       , const std::byte * const bufferWrite, const CallbackT& callbackWrite
                       , const size_t bytesToTransfer, size_t& actualTransfer)
@@ -186,9 +241,9 @@ namespace Stm32
         iRead = iWrite = 0;
         transferCallback_ = [this, bufferRead, callbackRead, bufferWrite, callbackWrite, bytesToTransfer, &actualTransfer]()
         {
-          /// @todo error checking
           if((spiInstance_->CR2 & SPI_CR2_TXEIE) && (spiInstance_->SR & SPI_SR_TXE))
           {
+            errorStatus_ = SpiError::NoError;
             if(iWrite < bytesToTransfer)
             {
               if(frameSize16Bits_)
@@ -210,6 +265,7 @@ namespace Stm32
           }
           if((spiInstance_->CR2 & SPI_CR2_RXNEIE) && (spiInstance_->SR & SPI_SR_RXNE))
           {
+            errorStatus_ = SpiError::NoError;
             if(iRead < bytesToTransfer)
             {
               if(frameSize16Bits_)
@@ -268,6 +324,8 @@ namespace Stm32
           actualTransfer = iWrite;
         }
         transferInProgress_ = true;
+        
+        // enable interrupts
         if(bufferRead != nullptr)
         {
           enableRxIrq();
@@ -280,6 +338,15 @@ namespace Stm32
         return true;                
       }
 
+      /**
+       * @brief Read and write the requested number of data via SPI.
+       * @note This function is blocking.
+       * 
+       * @param bufferRead The buffer in which the read data is stored.
+       * @param bufferWrite The buffer which holds the bytes to be written.
+       * @param bytesToTransfer The number of bytes to transfer.
+       * @return size_t The number of bytes that were transferred.
+       */
       size_t transfer(std::byte * const bufferRead, const std::byte * const bufferWrite, const size_t bytesToTransfer)
       {
         size_t bytesTransfered = 0;
@@ -291,8 +358,9 @@ namespace Stm32
         }
         while(transferInProgress_)
         {
-          /// @todo upgrade for errors
+          if(errorOccured_) break;
         }
+        errorOccured_ = false;
         return bytesTransfered;
       }
 
@@ -306,18 +374,66 @@ namespace Stm32
         return asyncTransfer(nullptr, {}, buffer, callback, bytesToWrite, actualWrite);
       }
 
+      /**
+       * Enable the SPI peripheral.
+       * 
+       */
       void enable()
       {
         spiInstance_->CR1 |= SPI_CR1_SPE;
       }
 
+      /**
+       * Disable the SPI peripheral.
+       * 
+       */
       void disable()
       {
-        spiInstance_->CR1 &= ~SPI_CR1_SPE;
+        while(!(spiInstance_->SR & SPI_SR_TXE));    //< wait for TXE to set
+        while(spiInstance_->SR & SPI_SR_BSY);       //< wait while Busy flag is not cleared
+        spiInstance_->CR1 &= ~SPI_CR1_SPE;          //< disable the SPI
+      }
+
+      /**
+       * Reset the SPI peripheral
+       * 
+       */
+      void reset()
+      {
+        if constexpr(SpiIndex == 1)
+        {
+          RCC->APB2RSTR |= RCC_APB2RSTR_SPI1RST;
+          RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI1RST;
+        }
+        else if constexpr(SpiIndex == 2)
+        {
+          RCC->APB1RSTR |= RCC_APB1RSTR_SPI2RST;
+          RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI2RST;
+        }
+        else if constexpr(SpiIndex == 3)
+        {
+          RCC->APB1RSTR |= RCC_APB1RSTR_SPI3RST;
+          RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI3RST;
+        }
+        else if constexpr(SpiIndex == 4)
+        {
+          RCC->APB2RSTR |= RCC_APB2RSTR_SPI4RST;
+          RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI4RST;
+        }
+      }
+
+      /**
+       * @brief Get the error status value
+       * 
+       * @return SpiError The SPI error.
+       */
+      SpiError getErrorStatus() const
+      {
+        return errorStatus_;
       }
 
     private:
-      SPI()
+      SPI() : errorStatus_(SpiError::NoError)
       {
         static_assert(SpiIndex >= 1 && SpiIndex <= 4, "Invalid SPI instance");
         
@@ -357,9 +473,35 @@ namespace Stm32
         {
           irqn = SPI4_IRQn;
         }
+
+        errorCallback_ = [this]() {
+          // set error status
+          if (spiInstance_->SR & SPI_SR_MODF)
+          {
+            errorStatus_ = SpiError::ModeFaultError;
+          }
+          else if (spiInstance_->SR & SPI_SR_OVR)
+          {
+            errorStatus_ = SpiError::OverrunError;
+          }
+          errorOccured_ = true;  //< to break blocking functions
+          // disable SPI peripheral
+          disable();
+          // call user error callback
+          if(userErrorCallback_)
+          {
+            userErrorCallback_();
+          }
+          // erase transfer callback
+          transferCallback_ = nullptr;
+          // disable SPI TX and RX interrupts
+          disableTxIrq();
+          disableRxIrq();
+        };
+
         NVIC_ClearPendingIRQ(irqn);
         NVIC_EnableIRQ(irqn);
-        // spiInstance_->CR2 |= SPI_CR2_ERRIE; //< error interrupt @todo
+        spiInstance_->CR2 |= SPI_CR2_ERRIE; //< error interrupt
       }
       // singleton class
       SPI(const SPI&) = delete;
@@ -537,8 +679,10 @@ namespace Stm32
       }
       SPI_TypeDef *const spiInstance_ = getSPIinstance();
       volatile bool transferInProgress_ = false;
+      volatile SpiError errorStatus_;
       bool frameSize16Bits_ = false;
       std::function<void(bool)> setSsLevel_ = nullptr;
+      CallbackT userErrorCallback_;
     public:
       inline static CallbackT transferCallback_;
       inline static CallbackT errorCallback_;
