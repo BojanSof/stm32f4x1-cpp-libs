@@ -486,7 +486,7 @@ namespace Stm32
           {
             errorStatus_ = SpiError::OverrunError;
           }
-          if(errorStatus != SpiError::NoError)
+          if(errorStatus_ != SpiError::NoError)
           {
             errorOccured_ = true;  //< to break blocking functions
             // disable SPI peripheral
