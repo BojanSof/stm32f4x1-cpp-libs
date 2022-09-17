@@ -486,19 +486,22 @@ namespace Stm32
           {
             errorStatus_ = SpiError::OverrunError;
           }
-          errorOccured_ = true;  //< to break blocking functions
-          // disable SPI peripheral
-          disable();
-          // call user error callback
-          if(userErrorCallback_)
+          if(errorStatus != SpiError::NoError)
           {
-            userErrorCallback_();
+            errorOccured_ = true;  //< to break blocking functions
+            // disable SPI peripheral
+            disable();
+            // call user error callback
+            if(userErrorCallback_)
+            {
+              userErrorCallback_();
+            }
+            // erase transfer callback
+            transferCallback_ = nullptr;
+            // disable SPI TX and RX interrupts
+            disableTxIrq();
+            disableRxIrq();
           }
-          // erase transfer callback
-          transferCallback_ = nullptr;
-          // disable SPI TX and RX interrupts
-          disableTxIrq();
-          disableRxIrq();
         };
 
         NVIC_ClearPendingIRQ(irqn);
