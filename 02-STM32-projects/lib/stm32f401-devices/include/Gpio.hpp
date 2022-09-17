@@ -100,7 +100,7 @@ namespace Stm32
       }
       else
       {
-        gpioInstance_->AFR[1] |= static_cast<uint8_t>(af) << (4 * pin);
+        gpioInstance_->AFR[1] |= static_cast<uint8_t>(af) << (4 * (pin - 8));
       }
     }
 
