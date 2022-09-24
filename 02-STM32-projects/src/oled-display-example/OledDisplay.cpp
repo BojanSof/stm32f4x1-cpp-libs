@@ -1,13 +1,15 @@
+#include <chrono>
+#include <type_traits>
+
 #include <Gpio.hpp>
 #include <Clock.hpp>
 #include <I2C.hpp>
 #include <OledDisplay.hpp>
-#include <Circle.hpp>
-#include <Triangle.hpp>
 #include <CycleCounter.hpp>
-#include <chrono>
-#include <type_traits>
-#include <Text.hpp>
+
+#include <EmbeddedGfx/Circle.hpp>
+#include <EmbeddedGfx/Triangle.hpp>
+#include <EmbeddedGfx/Text.hpp>
 
 int main()
 {
@@ -21,17 +23,18 @@ int main()
   oled.init();
   auto& canvas = oled.getCanvas();
   using CanvasT = std::remove_reference_t<decltype(canvas)>;
-  Circle<CanvasT> circle(40, 40, 20);
+  Circle<CanvasT> circle{40, 40, 20};
+  circle.setOutlineColor(Colors::White);
   canvas.draw(circle);
-  Triangle<CanvasT> triangle({{{10, 20}, {0, 40}, {110, 60}}});
+  Triangle<CanvasT> triangle{{{{10, 20}, {0, 40}, {110, 60}}}};
+  triangle.setOutlineColor(Colors::White);
   canvas.draw(triangle);
   oled.updateScreen();
 
   //canvas.clear();
-  Text<100, Font<6, 8>, CanvasT> text1("S W C E N C E   M O E");
-  Text<100, Font<6, 8>, CanvasT> text2("OLED T E S T !!!", {10, 20});
-  canvas.draw(text1);
-  canvas.draw(text2);
+  Text<100, Font<6, 8>, CanvasT> text{"OLED T E S T !!!", {10, 20}};
+  text.setColor(Colors::White);
+  canvas.draw(text);
   oled.updateScreen();
   
   while(true)

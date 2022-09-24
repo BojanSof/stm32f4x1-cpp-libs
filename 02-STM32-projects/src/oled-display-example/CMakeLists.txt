@@ -16,6 +16,7 @@ target_link_libraries(${TARGET}
   PUBLIC
     stm32f401-devices
     oled-display
+    embedded-gfx
 )
 
 stm32_print_size_of_target(${TARGET})

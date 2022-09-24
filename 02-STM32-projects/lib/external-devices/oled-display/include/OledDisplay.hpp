@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <I2C.hpp>
 
-#include <Canvas.hpp>
+#include <EmbeddedGfx/BufferedCanvas.hpp>
 
 
 namespace Devices
@@ -126,12 +126,12 @@ namespace Devices
       void updateScreen()
       {
         auto data = reinterpret_cast<const uint8_t*>(canvas_.getMatrix().data());
-        writeData(data, canvas_.getRows() * canvas_.getColumns() / canvas_.PageSize);
+        writeData(data, canvas_.getHeight() * canvas_.getWidth() / canvas_.PageSize);
       }
 
       static constexpr uint8_t height_ = 64;
       static constexpr uint8_t width_ = 128;
-      using CanvasT = EmbeddedGfx::Canvas<height_, width_, CanvasType::Page>;
+      using CanvasT = EmbeddedGfx::BufferedCanvas<width_, height_, EmbeddedGfx::CanvasType::Page, EmbeddedGfx::ColorType::BlackAndWhite>;
       CanvasT& getCanvas() { return canvas_; }
 
     private:
