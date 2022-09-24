@@ -1,6 +1,8 @@
 #ifndef STM32_GPIO_TYPES_HPP
 #define STM32_GPIO_TYPES_HPP
 
+#include <stm32f4xx.h>
+
 #include <cstdint>
 
 namespace Stm32
@@ -74,6 +76,28 @@ namespace Stm32
     Af14 = 0xE,
     Af15 = 0xF
   };
+
+  constexpr GPIO_TypeDef* getGpioInstance(const Port& port)
+  {
+    switch (port)
+    {
+    case Port::A:
+      return GPIOA;
+      break;
+    case Port::B:
+      return GPIOB;
+      break;
+    case Port::C:
+      return GPIOC;
+      break;
+    case Port::H:
+      return GPIOH;
+      break;
+    default:
+      return nullptr;
+      break;
+    }
+  }
 }
 
 #endif //STM32_GPIO_TYPES_HPP

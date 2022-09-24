@@ -6,8 +6,10 @@
 #include "ExternalInterruptController.hpp"
 
 #include <stm32f4xx.h>
+#include <bitset>
 #include <cstdint>
 #include <functional>
+#include <tuple>
 
 
 namespace Stm32
@@ -45,6 +47,12 @@ namespace Stm32
       }
     }
 
+    /**
+     * @brief Enable external interrupt for the pin
+     * 
+     * @tparam Edge The edge on which the interrupt is triggered
+     * @param callback The callback to execute when interrupt fires
+     */
     template<GpioExternalInterruptEdge Edge>
     void enableInterrupt(const std::function<void()>& callback)
     {
@@ -52,46 +60,95 @@ namespace Stm32
       exti.enableInterrupt<Gpio<port, pin>, Edge>(callback);
     }
 
+    /**
+     * Disable external interrupt for the pin
+     * 
+     */
     void disableInterrupt()
     {
       auto& exti = ExternalInterruptController::getInstance();
       exti.disableInterrupt<Gpio<port, pin>>();
     }
 
-    void setMode(const GpioMode &mode)
+    /**
+     * @brief Set the mode for the pin, i.e. input, output, etc.
+     * 
+     * @param mode The mode for the pin
+     */
+    void setMode(const GpioMode& mode)
     {
       gpioInstance_->MODER &= ~(0x3 << (2 * pin));
       gpioInstance_->MODER |= static_cast<uint8_t>(mode) << (2 * pin);
     }
 
+    /**
+     * @brief Set the level of the pin
+     * 
+     * @param lvl True to set pin high, false to set pin low
+     */
     void setLevel(const bool lvl)
     {
       gpioInstance_->BSRR = 1 << (pin + (lvl ? 0 : 16));
     }
 
+    /**
+     * @brief Read the state of the pin
+     * 
+     * @return true The pin is high
+     * @return false The pin is low
+     */
     bool getState()
     {
       return (gpioInstance_->IDR & (1 << pin));
     }
 
-    void setSpeed(const GpioSpeed &speed)
+    /**
+     * @brief Set the speed of the pin (controls the slew rate)
+     * 
+     * @param speed The speed of the pin
+     */
+    void setSpeed(const GpioSpeed& speed)
     {
       gpioInstance_->OSPEEDR &= ~(0x3 << (2 * pin));
       gpioInstance_->OSPEEDR |= static_cast<uint8_t>(speed) << (2 * pin);
     }
 
-    void setOutputType(const GpioOutputType &output)
+    /**
+     * @brief Set the Output Type of the pin, i.e. push-pull or open-drain
+     * 
+     * @param output The output type of the pin
+     */
+    void setOutputType(const GpioOutputType& output)
     {
-      gpioInstance_->OTYPER |= static_cast<uint8_t>(output) << pin;
+      if(output == GpioOutputType::PushPull)
+      {
+        gpioInstance_->OTYPER &= ~(static_cast<uint8_t>(output) << pin);
+      }
+      else
+      {
+        gpioInstance_->OTYPER |= static_cast<uint8_t>(output) << pin;
+      }
     }
 
-    void setPullType(const GpioPullType &pull)
+    /**
+     * @brief Set the internal pull up/down resistors
+     * for the pin
+     * 
+     * @param pull The type of the internal resistor(s) to use
+     */
+    void setPullType(const GpioPullType& pull)
     {
       gpioInstance_->PUPDR &= ~(0x3 << (2 * pin));
       gpioInstance_->PUPDR |= static_cast<uint8_t>(pull) << (2 * pin);
     }
 
-    void setAlternateFunction(const GpioAlternateFunctionNumber &af)
+    /**
+     * @brief Set the alternate function of the pin
+     * based on the alternate function number
+     * 
+     * @param af The alternate function number
+     */
+    void setAlternateFunction(const GpioAlternateFunctionNumber& af)
     {
       setMode(GpioMode::Alternate);
       if constexpr (pin < 8)
@@ -104,40 +161,202 @@ namespace Stm32
       }
     }
 
+    /**
+     * @brief Set the alternate function for the pin
+     * based on its available alternate functions
+     * 
+     * @param af The alternate function to set
+     */
     void setAlternateFunction(const typename AlternateFunctions::Type af)
     {
       setAlternateFunction(static_cast<GpioAlternateFunctionNumber>(static_cast<uint16_t>(af) >> 8));
     }
 
+    /**
+     * @brief Check if pin has the specified alternate function
+     * 
+     * @param af The ID of the alternate function
+     * @return true The pin has the specified alternate function
+     * @return false The pin does not have the specified alternate function
+     */
     constexpr bool checkAlternateFunction(const GpioAlternateFunctionId af)
     {
       return gpioCheckAlternateFunction<port, pin>(af);
     }
 
   private:
-    constexpr static GPIO_TypeDef *getGpioInstance()
+    GPIO_TypeDef *const gpioInstance_ = getGpioInstance(port);
+  };
+
+  // Function that work on multiple pins
+  namespace Pins
+  {
+    /**
+     * @brief Check if the pins are part of the same port
+     * 
+     * @tparam Pins The pins to check
+     * @return true Pins are part of the same port
+     * @return false Pins are not part of the same port
+     */
+    template<typename... Pins>
+    constexpr bool gpioSamePort()
     {
-      switch (port)
+      return ((Pins::pinPort == (std::tuple_element_t<0, std::tuple<Pins...>>::pinPort)) && ... );
+    }
+
+    /**
+     * @brief Set the mode for multiple pins
+     * 
+     * @tparam Pins The pins to change the mode for
+     * @param mode The mode of the pins
+     */
+    template<typename... Pins>
+    void setMode(const GpioMode& mode)
+    {
+      static_assert(sizeof...(Pins) > 0, "Number of specified pins must be positive");
+      if constexpr(gpioSamePort<Pins...>())
       {
-      case Port::A:
-        return GPIOA;
-        break;
-      case Port::B:
-        return GPIOB;
-        break;
-      case Port::C:
-        return GPIOC;
-        break;
-      case Port::H:
-        return GPIOH;
-        break;
-      default:
-        return nullptr;
-        break;
+        using FirstPin = std::tuple_element_t<0, std::tuple<Pins...>>;
+        auto port = getGpioInstance(FirstPin::pinPort);
+        uint32_t moder = port->MODER;
+        ([&]{
+          moder &= ~(0x3 << (2 * Pins::pinNumber));
+          moder |= static_cast<uint8_t>(mode) << (2 * Pins::pinNumber);
+        }(), ...);
+        port->MODER = moder;
+      }
+      else
+      {
+        ([&]{
+          Pins{}.setMode(mode);
+        }(), ...);
       }
     }
-    GPIO_TypeDef *const gpioInstance_ = getGpioInstance();
-  };
+
+    /**
+     * @brief Set the speed for multiple pins
+     * 
+     * @tparam Pins The pins to change the speed for
+     * @param speed The speed for the pins
+     */
+    template<typename... Pins>
+    void setSpeed(const GpioSpeed& speed)
+    {
+      static_assert(sizeof...(Pins) > 0, "Number of specified pins must be positive");
+      if constexpr(gpioSamePort<Pins...>())
+      {
+        using FirstPin = std::tuple_element_t<0, std::tuple<Pins...>>;
+        auto port = getGpioInstance(FirstPin::pinPort);
+        uint32_t ospeedr = port->OSPEEDR;
+        ([&]{
+          ospeedr &= ~(0x3 << (2 * Pins::pinNumber));
+          ospeedr |= static_cast<uint8_t>(speed) << (2 * Pins::pinNumber);
+        }(), ...);
+        port->OSPEEDR = ospeedr;
+      }
+      else
+      {
+        ([&]{
+          Pins{}.setSpeed(speed);
+        }(), ...);
+      }
+    }
+
+    /**
+     * @brief Set the output type for multiple pins
+     * 
+     * @tparam Pins The pins to change the output type for
+     * @param output The output type for the pins
+     */
+    template<typename... Pins>
+    void setOutputType(const GpioOutputType& output)
+    {
+      static_assert(sizeof...(Pins) > 0, "Number of specified pins must be positive");
+      if constexpr(gpioSamePort<Pins...>())
+      {
+        using FirstPin = std::tuple_element_t<0, std::tuple<Pins...>>;
+        auto port = getGpioInstance(FirstPin::pinPort);
+        uint32_t otyper = port->OTYPER;
+        ([&]{
+          if(output == GpioOutputType::PushPull)
+          {
+            otyper &= ~(static_cast<uint8_t>(output) << Pins::pinNumber);
+          }
+          else
+          {
+            otyper |= static_cast<uint8_t>(output) << Pins::pinNumber;
+          }
+        }(), ...);
+        port->OTYPER = otyper;
+      }
+      else
+      {
+        ([&]{
+          Pins{}.setOutputType(output);
+        }(), ...);
+      }
+    }
+
+    /**
+     * @brief Set the pull type for multiple pins
+     * 
+     * @tparam Pins The pins to change the pull type for
+     * @param pull The pull type
+     */
+    template<typename... Pins>
+    void setPullType(const GpioPullType& pull)
+    {
+      static_assert(sizeof...(Pins) > 0, "Number of specified pins must be positive");
+      if constexpr(gpioSamePort<Pins...>())
+      {
+        using FirstPin = std::tuple_element_t<0, std::tuple<Pins...>>;
+        auto port = getGpioInstance(FirstPin::pinPort);
+        uint32_t pupdr = port->PUPDR;
+        ([&]{
+          pupdr &= ~(0x3 << (2 * Pins::pinNumber));
+          pupdr |= static_cast<uint8_t>(pull) << (2 * Pins::pinNumber);
+        }(), ...);
+        port->PUPDR = pupdr;
+      }
+      else
+      {
+        ([&]{
+          Pins{}.setPullType(pull);
+        }(), ...);
+      }
+    }
+
+    /**
+     * @brief Set the level of the specified pins
+     * 
+     * @tparam Pins The pins to change the levels for
+     * @param levels The levels for the pins
+     */
+    
+    template<typename... Pins>
+    void setLevel(const std::bitset<sizeof...(Pins)>& levels)
+    {
+      static_assert(sizeof...(Pins) > 0, "Number of specified pins must be positive");
+      if constexpr(gpioSamePort<Pins...>())
+      {
+        using FirstPin = std::tuple_element_t<0, std::tuple<Pins...>>;
+        auto port = getGpioInstance(FirstPin::pinPort);
+        uint32_t bsrr = 0;
+        size_t iLevel = 0;
+        ([&]{
+          bsrr |= 1 << (Pins::pinNumber + (levels[iLevel++] ? 0 : 16));
+        }(), ...);
+        port->BSRR = bsrr;
+      }
+      else
+      {
+        size_t iLevel = 0;
+        ([&]{
+          Pins{}.setLevel(levels[iLevel++]);
+        }(), ...);
+      }
+    }
+  }
 
   // Pins on STM32F401CCU6, UQFN48 package
   namespace Pins
