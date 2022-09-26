@@ -334,7 +334,7 @@ namespace Stm32
      */
     
     template<typename... Pins>
-    void setLevel(const std::bitset<sizeof...(Pins)>& levels)
+    void setLevel(const uint32_t levels)
     {
       static_assert(sizeof...(Pins) > 0, "Number of specified pins must be positive");
       if constexpr(gpioSamePort<Pins...>())
@@ -344,7 +344,7 @@ namespace Stm32
         uint32_t bsrr = 0;
         size_t iLevel = 0;
         ([&]{
-          bsrr |= 1 << (Pins::pinNumber + (levels[iLevel++] ? 0 : 16));
+          bsrr |= 1 << (Pins::pinNumber + ((levels & (1 << iLevel++)) ? 0 : 16));
         }(), ...);
         port->BSRR = bsrr;
       }
@@ -352,7 +352,7 @@ namespace Stm32
       {
         size_t iLevel = 0;
         ([&]{
-          Pins{}.setLevel(levels[iLevel++]);
+          Pins{}.setLevel(levels & (1 << iLevel++));
         }(), ...);
       }
     }
