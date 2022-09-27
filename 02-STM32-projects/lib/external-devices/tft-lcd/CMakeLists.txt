@@ -6,6 +6,7 @@ add_library(${TARGET} INTERFACE)
 target_sources(${TARGET}
   INTERFACE
     "include/TftLcd.hpp"
+    "include/Touch.hpp"
 )
 
 target_include_directories(${TARGET}

@@ -142,7 +142,7 @@
     "type": "cortex-debug",
     "request": "launch",
     "cwd": "${workspaceRoot}",
-    "executable": "${workspaceRoot}/build/STM32-projects/src/tft-lcd-example/Debug/tft-lcd-example.elf",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/tft-lcd-example/RelWithDebInfo/tft-lcd-example.elf",
     "servertype": "jlink",
     "device": "STM32F401CC",
     "interface": "swd",

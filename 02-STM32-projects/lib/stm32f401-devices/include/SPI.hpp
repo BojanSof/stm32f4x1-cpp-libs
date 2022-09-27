@@ -79,7 +79,8 @@ namespace Stm32
     , bool FrameSize16Bits
     , bool LSBfirst
     , typename PinsT
-    , bool HardwareSs>
+    , bool HardwareSs
+    , bool UserControlsSs = false>
   struct SpiConfig
   {
     static constexpr uint32_t clockFrequency = ClockFrequency;
@@ -87,6 +88,7 @@ namespace Stm32
     static constexpr auto spiMode = Mode;
     static constexpr bool frameSize16Bits = FrameSize16Bits;
     static constexpr bool lsbFirst = LSBfirst;
+    static constexpr bool userControlsSs = UserControlsSs;
     using pinsT = PinsT;
   };
 
@@ -200,17 +202,22 @@ namespace Stm32
           spiInstance_->CR1 &= ~SPI_CR1_SSM;
           spiInstance_->CR2 |= SPI_CR2_SSOE;
           setSsLevel_ = nullptr;
+          userControlsSs_ = false;
         }
         else
         {
+          userControlsSs_ = config.userControlsSs;
           spiInstance_->CR1 |= SPI_CR1_SSM;
           spiInstance_->CR1 |= SPI_CR1_SSI;
-          setSsLevel_ = [](const bool level){
-            using PinsT = typename SPIconfigT::pinsT;
-            using SsPinT = typename PinsT::ssPin;
-            SsPinT ss;
-            ss.setLevel(level);
-          };
+          if(!userControlsSs_)
+          {
+            setSsLevel_ = [](const bool level){
+              using PinsT = typename SPIconfigT::pinsT;
+              using SsPinT = typename PinsT::ssPin;
+              SsPinT ss;
+              ss.setLevel(level);
+            };
+          }
         }
       }
 
@@ -291,7 +298,7 @@ namespace Stm32
           if(writeFinished && readFinished)
           {
             // if using software SS
-            if(setSsLevel_)
+            if(!userControlsSs_ && setSsLevel_)
             {
               // set SS high
               setSsLevel_(true);
@@ -304,7 +311,7 @@ namespace Stm32
         // start clock
         enable();
         // if using software SS
-        if(setSsLevel_)
+        if(!userControlsSs_ && setSsLevel_)
         {
           // set SS low
           setSsLevel_(false);
@@ -687,6 +694,7 @@ namespace Stm32
       volatile SpiError errorStatus_;
       bool frameSize16Bits_ = false;
       std::function<void(bool)> setSsLevel_ = nullptr;
+      bool userControlsSs_ = false;
       CallbackT userErrorCallback_;
     public:
       inline static CallbackT transferCallback_;

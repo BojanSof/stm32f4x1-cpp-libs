@@ -343,9 +343,10 @@ namespace Stm32
         auto port = getGpioInstance(FirstPin::pinPort);
         uint32_t bsrr = 0;
         size_t iLevel = 0;
-        ([&]{
-          bsrr |= 1 << (Pins::pinNumber + ((levels & (1 << iLevel++)) ? 0 : 16));
-        }(), ...);
+        // ([&]{
+        //   bsrr |= 1 << (Pins::pinNumber + ((levels & (1 << iLevel++)) ? 0 : 16));
+        // }(), ...);
+        ((bsrr |= ((1 << (Pins::pinNumber + ((levels & (1 << iLevel)) ? 0 : 16)))), iLevel++),  ...);
         port->BSRR = bsrr;
       }
       else

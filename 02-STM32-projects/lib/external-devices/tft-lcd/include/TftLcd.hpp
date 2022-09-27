@@ -8,7 +8,6 @@
 
 #include <EmbeddedGfx/UnbufferedCanvas.hpp>
 
-
 namespace Devices
 {
   template<
@@ -99,19 +98,20 @@ namespace Devices
         
         setBacklight(true);
         Stm32::CycleCounter::delay(4s);
-        for(size_t y = 0; y < Height; ++y)
-        {
-          for(size_t x = 0; x < Width; ++x)
-          {
-            setPixel(x, y, 0xc0c0);
-          }
-        }
+        // for(size_t y = 0; y < Height; ++y)
+        // {
+        //   for(size_t x = 0; x < Width; ++x)
+        //   {
+        //     setPixel(x, y, 0xc0c0);
+        //   }
+        // }
+        clear(0x5050);
       }
 
       void reset()
       {
-        rstPin_.setLevel(true);
         using namespace std::chrono_literals;
+        rstPin_.setLevel(true);
         Stm32::CycleCounter::delay(1ms);
         rstPin_.setLevel(false);
         Stm32::CycleCounter::delay(10ms);
@@ -135,6 +135,34 @@ namespace Devices
               , static_cast<uint8_t>(y)
         };
         writeCmd(PageAddressSetCmd, params2, sizeof(params2));
+      }
+
+      void setWindow(const uint16_t xStart, const uint16_t yStart, const uint16_t xEnd, const uint16_t yEnd)
+      {
+        const uint8_t params1[] = {
+                static_cast<uint8_t>(xStart >> 8)
+              , static_cast<uint8_t>(xStart)
+              , static_cast<uint8_t>(xEnd >> 8)
+              , static_cast<uint8_t>(xEnd)
+        };
+        writeCmd(ColumnAddressSetCmd, params1, sizeof(params1));
+        const uint8_t params2[] = {
+                static_cast<uint8_t>(yStart >> 8)
+              , static_cast<uint8_t>(yStart)
+              , static_cast<uint8_t>(yEnd >> 8)
+              , static_cast<uint8_t>(yEnd)
+        };
+        writeCmd(PageAddressSetCmd, params2, sizeof(params2));
+      }
+
+      void clear(const uint16_t color)
+      {
+        setWindow(0, 0, Width - 1, Height - 1);
+        writeCmd(MemoryWriteCmd, nullptr, 0);
+        for(size_t i = 0; i < Width*Height; ++i)
+        {
+          writeData(reinterpret_cast<const uint8_t*>(&color), 1);
+        }
       }
 
       void setPixel(const size_t x, const size_t y, uint16_t value)
