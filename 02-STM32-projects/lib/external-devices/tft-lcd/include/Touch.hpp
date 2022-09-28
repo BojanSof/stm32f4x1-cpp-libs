@@ -42,25 +42,19 @@ namespace Devices
           , false            //< send MSB first
           , ConfigPins       //< SPI pins
           , true             //< software SS control
-          , true             //< user controls SS
         >;
         spi.template configure<Config>();
 
-        SsPinT slaveSelect;
-        uint8_t rawSpiData[2]{};
-        uint8_t zerosSpi[2]{0, 0};
+        uint8_t readData[3]{};
+        uint8_t writeData[3]{};
         // read Z1
-        slaveSelect.setLevel(false);
-        spi.write(reinterpret_cast<const std::byte*>(&ReadZ1Cmd), 1);
-        spi.transfer(reinterpret_cast<std::byte*>(rawSpiData), reinterpret_cast<const std::byte*>(zerosSpi), 2);
-        slaveSelect.setLevel(true);
-        uint16_t z1 = (rawSpiData[0] << 4) | (rawSpiData[1] >> 3);
+        writeData[0] = ReadZ1Cmd;
+        spi.transfer(reinterpret_cast<std::byte*>(readData), reinterpret_cast<const std::byte*>(writeData), 3);
+        uint16_t z1 = (readData[1] << 5) | (readData[2] >> 3);
         // read Z2
-        slaveSelect.setLevel(false);
-        spi.write(reinterpret_cast<const std::byte*>(&ReadZ2Cmd), 1);
-        spi.transfer(reinterpret_cast<std::byte*>(rawSpiData), reinterpret_cast<const std::byte*>(zerosSpi), 2);
-        slaveSelect.setLevel(true);
-        uint16_t z2 = (rawSpiData[0] << 4) | (rawSpiData[1] >> 3);
+        writeData[0] = ReadZ2Cmd;
+        spi.transfer(reinterpret_cast<std::byte*>(readData), reinterpret_cast<const std::byte*>(writeData), 3);
+        uint16_t z2 = (readData[1] << 5) | (readData[2] >> 3);
         const uint16_t z = 4095 - z2 + z1;
         if(z < zThreshold) return std::nullopt;
         // N reads of X
@@ -70,17 +64,13 @@ namespace Devices
         for(size_t iRead = 0; iRead < NumReads; ++iRead)
         {
           // read X
-          slaveSelect.setLevel(false);
-          spi.write(reinterpret_cast<const std::byte*>(&ReadXCmd), 1);
-          spi.transfer(reinterpret_cast<std::byte*>(rawSpiData), reinterpret_cast<const std::byte*>(zerosSpi), 2);
-          slaveSelect.setLevel(true);
-          xRaw[iRead] = (rawSpiData[0] << 4) | (rawSpiData[1] >> 3);
+          writeData[0] = ReadXCmd;
+          spi.transfer(reinterpret_cast<std::byte*>(readData), reinterpret_cast<const std::byte*>(writeData), 3);
+          xRaw[iRead] = (readData[1] << 5) | (readData[2] >> 3);
           // read Y
-          slaveSelect.setLevel(false);
-          spi.write(reinterpret_cast<const std::byte*>(&ReadYCmd), 1);
-          spi.transfer(reinterpret_cast<std::byte*>(rawSpiData), reinterpret_cast<const std::byte*>(zerosSpi), 2);
-          slaveSelect.setLevel(true);
-          yRaw[iRead] = (rawSpiData[0] << 4) | (rawSpiData[1] >> 3);
+          writeData[0] = ReadYCmd;
+          spi.transfer(reinterpret_cast<std::byte*>(readData), reinterpret_cast<const std::byte*>(writeData), 3);
+          yRaw[iRead] = (readData[1] << 5) | (readData[2] >> 3);
         }
         // sort the arrays
         std::sort(std::begin(xRaw), std::end(xRaw));
