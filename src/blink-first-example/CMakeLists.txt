@@ -14,7 +14,7 @@ target_compile_features(${TARGET}
 
 target_link_libraries(${TARGET}
   PUBLIC
-    $<IF:$<STREQUAL:${DEVICE},STM32F401CC>,CMSIS::STM32::F401CC,CMSIS::STM32::F411CE>
+    ${CMSIS_LIBRARY}
     STM32::NoSys
     STM32::Nano)
 

@@ -25,5 +25,12 @@ find_package(CMSIS COMPONENTS ${DEVICE} REQUIRED)
 find_package(FsmGenerator REQUIRED)
 find_package(EmbeddedGfx REQUIRED)
 
+# set cmsis library for linking based on device
+if(DEVICE STREQUAL "STM32F401CC")
+  set(CMSIS_LIBRARY CMSIS::STM32::F401CC)
+elseif(DEVICE STREQUAL "STM32F411CE")
+  set(CMSIS_LIBRARY CMSIS::STM32::F411CE)
+endif()
+
 add_subdirectory(lib)
 add_subdirectory(src)
