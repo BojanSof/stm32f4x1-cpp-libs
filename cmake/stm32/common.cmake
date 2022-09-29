@@ -65,6 +65,7 @@ function(stm32_generate_binary_file TARGET)
         TARGET ${TARGET}
         POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary "$<TARGET_FILE:${TARGET}>" "$<TARGET_FILE_BASE_NAME:${TARGET}>.bin"
+        COMMAND ${CMAKE_SIZE} "$<TARGET_FILE:${TARGET}>"
         BYPRODUCTS ${TARGET}.bin
         COMMENT "Generating binary file ${CMAKE_PROJECT_NAME}.bin"
     )

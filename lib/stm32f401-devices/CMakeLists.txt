@@ -37,6 +37,6 @@ target_compile_features(${TARGET}
 target_link_libraries(${TARGET}
   PUBLIC
     #cfsm-generator
-    CMSIS::STM32::F401CC
+    $<IF:$<STREQUAL:${DEVICE},STM32F401CC>,CMSIS::STM32::F401CC,CMSIS::STM32::F411CE>
     STM32::NoSys
     STM32::Nano)
