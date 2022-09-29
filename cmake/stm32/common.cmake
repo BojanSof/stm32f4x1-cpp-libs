@@ -52,14 +52,6 @@ find_program(CMAKE_SIZE NAMES ${STM32_TARGET_TRIPLET}-size HINTS ${TOOLCHAIN_BIN
 find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb HINTS ${TOOLCHAIN_BIN_PATH})
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt HINTS ${TOOLCHAIN_BIN_PATH})
 
-function(stm32_print_size_of_target TARGET)
-    add_custom_target(${TARGET}_always_display_size
-        ALL COMMAND ${CMAKE_SIZE} "$<TARGET_FILE:${TARGET}>"
-        COMMENT "Target Sizes: "
-        DEPENDS ${TARGET}
-    )
-endfunction()
-
 function(stm32_generate_binary_file TARGET)
     add_custom_command(
         TARGET ${TARGET}

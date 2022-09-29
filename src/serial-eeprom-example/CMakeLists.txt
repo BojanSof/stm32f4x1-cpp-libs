@@ -18,7 +18,6 @@ target_link_libraries(${TARGET}
     serial-eeprom
 )
 
-stm32_print_size_of_target(${TARGET})
 stm32_generate_binary_file(${TARGET})
 
 include(${PROJECT_SOURCE_DIR}/cmake/stm32/stlink.cmake)

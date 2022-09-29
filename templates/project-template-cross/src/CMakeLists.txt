@@ -22,7 +22,6 @@ target_link_libraries(stm32f4-blink
     CMSIS::STM32::F401CC
     STM32::NoSys)
 
-stm32_print_size_of_target(stm32f4-blink)
 stm32_generate_binary_file(stm32f4-blink)
 
 include(${PROJECT_SOURCE_DIR}/cmake/stm32/stlink.cmake)
