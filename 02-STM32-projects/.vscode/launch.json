@@ -136,6 +136,18 @@
     "interface": "swd",
     "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
     "runToEntryPoint": "main"
+  },
+  {
+    "name": "TFT LCD example",
+    "type": "cortex-debug",
+    "request": "launch",
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/STM32-projects/src/tft-lcd-example/RelWithDebInfo/tft-lcd-example.elf",
+    "servertype": "jlink",
+    "device": "STM32F401CC",
+    "interface": "swd",
+    "svdFile": "${workspaceRoot}/svd/STM32F401.svd",
+    "runToEntryPoint": "main"
   }
   ]
 }

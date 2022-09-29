@@ -44,6 +44,12 @@
           "name": "build-clean-release",
           "inherits": "build-release",
           "cleanFirst": true
+        },
+        {
+          "name": "build-relwithdebinfo",
+          "configurePreset": "STM32-projects",
+          "inheritConfigureEnvironment": true,
+          "configuration": "RelWithDebInfo"
         }
     ]
 }
