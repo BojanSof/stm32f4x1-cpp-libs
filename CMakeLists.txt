@@ -11,7 +11,7 @@ list(APPEND CMAKE_MODULE_PATH
   "${CMAKE_CURRENT_LIST_DIR}/cmake"
 )
 
-option(STM32F4_GENERATE_FLASH_TARGETS "Add JLink and ST-link flash targets" ON)
+option(STM32F4X1_GENERATE_FLASH_TARGETS "Add JLink and ST-link flash targets" ON)
 
 # fetch CMSIS
 stm32_fetch_cmsis(F4)

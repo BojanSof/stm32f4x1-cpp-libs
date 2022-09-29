@@ -19,6 +19,7 @@ target_link_libraries(${TARGET}
 )
 
 stm32_generate_binary_file(${TARGET})
-
-include(${PROJECT_SOURCE_DIR}/cmake/stm32/stlink.cmake)
-st_link_flash(${TARGET})
+if(STM32F4X1_GENERATE_FLASH_TARGETS)
+  include(${PROJECT_SOURCE_DIR}/cmake/stm32/flash_targets.cmake)
+  generate_flash_targets(${TARGET})
+endif()

@@ -25,7 +25,7 @@
           "value": "${sourceDir}/cmake/stm32_gcc.cmake",
           "type": "FILEPATH"
         },
-        "STM32F4_GENERATE_FLASH_TARGETS": "ON"
+        "STM32F4X1_GENERATE_FLASH_TARGETS": "ON"
       }
     },
     {
