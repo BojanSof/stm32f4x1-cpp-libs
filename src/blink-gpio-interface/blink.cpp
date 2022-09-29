@@ -1,6 +1,7 @@
-#include <Gpio.hpp>
-#include <Clock.hpp>
 #include <cstdint>
+
+#include <STM32F4x1/Gpio.hpp>
+#include <STM32F4x1/Clock.hpp>
 
 int main()
 {

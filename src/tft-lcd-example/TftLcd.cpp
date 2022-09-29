@@ -2,12 +2,13 @@
 #include <chrono>
 #include <type_traits>
 
-#include <Gpio.hpp>
-#include <Clock.hpp>
-#include <SPI.hpp>
+#include <STM32F4x1/Gpio.hpp>
+#include <STM32F4x1/Clock.hpp>
+#include <STM32F4x1/SPI.hpp>
+#include <STM32F4x1/CycleCounter.hpp>
+
 #include <TftLcd.hpp>
 #include <Touch.hpp>
-#include <CycleCounter.hpp>
 
 #include <EmbeddedGfx/Circle.hpp>
 #include <EmbeddedGfx/Triangle.hpp>

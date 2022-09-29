@@ -14,7 +14,7 @@ target_compile_features(${TARGET}
 
 target_link_libraries(${TARGET}
   PUBLIC
-    stm32f401-devices
+    stm32f4x1-devices
     sseg-display)
 
 stm32_generate_binary_file(${TARGET})

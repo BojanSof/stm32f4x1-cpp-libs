@@ -2,10 +2,10 @@
 #define STM32_GENERAL_PURPOSE_TIMER_HPP
 
 #include <functional>
-
 #include <stm32f4xx.h>
-#include <Clock.hpp>
-#include <Gpio.hpp>
+
+#include "Clock.hpp"
+#include "Gpio.hpp"
 
 
 namespace Stm32

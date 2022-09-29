@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <optional>
 
-#include <SPI.hpp>
+#include <STM32F4x1/SPI.hpp>
 
 namespace Devices
 {

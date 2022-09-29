@@ -1,7 +1,7 @@
-#include <SPI.hpp>
-#include <Gpio.hpp>
-#include <Clock.hpp>
-#include <CycleCounter.hpp>
+#include <STM32F4x1/SPI.hpp>
+#include <STM32F4x1/Gpio.hpp>
+#include <STM32F4x1/Clock.hpp>
+#include <STM32F4x1/CycleCounter.hpp>
 
 int main()
 {

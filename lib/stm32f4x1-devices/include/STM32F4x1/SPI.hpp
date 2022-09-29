@@ -1,10 +1,11 @@
 #ifndef STM32_SPI_HPP
 #define STM32_SPI_HPP
 
-#include <stm32f4xx.h>
 #include <cstdint>
 #include <ratio>
 #include <functional>
+
+#include <stm32f4xx.h>
 
 #include "Clock.hpp"
 #include "ComInterface.hpp"

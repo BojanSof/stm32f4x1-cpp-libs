@@ -5,8 +5,8 @@
 #include <cstddef>
 #include <chrono>
 
-#include <I2C.hpp>
-#include <CycleCounter.hpp>
+#include <STM32F4x1/I2C.hpp>
+#include <STM32F4x1/CycleCounter.hpp>
 
 namespace Devices
 {
@@ -108,7 +108,7 @@ namespace Devices
               >;
         i2cInstance.template configure<eepromI2Cconfig>();
         // address buffer
-        std::byte singleWriteBuffer[2]{};
+        std::byte singleWriteBuffer[3]{};
         uint16_t currentAddress = startAddress;
         // write the data byte by byte
         ///@todo utilize page write mode

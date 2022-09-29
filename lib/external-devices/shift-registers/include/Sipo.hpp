@@ -2,7 +2,7 @@
 #define SIPO_HPP
 
 #include <cstdint>
-#include <Gpio.hpp>
+#include <STM32F4x1/Gpio.hpp>
 
 namespace Devices{
 

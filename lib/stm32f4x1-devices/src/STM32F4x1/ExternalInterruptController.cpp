@@ -1,4 +1,4 @@
-#include "ExternalInterruptController.hpp"
+#include "STM32F4x1/ExternalInterruptController.hpp"
 
 namespace Stm32
 {

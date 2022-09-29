@@ -1,11 +1,11 @@
 #include <chrono>
 #include <type_traits>
 
-#include <Gpio.hpp>
-#include <Clock.hpp>
-#include <I2C.hpp>
+#include <STM32F4x1/Gpio.hpp>
+#include <STM32F4x1/Clock.hpp>
+#include <STM32F4x1/I2C.hpp>
+#include <STM32F4x1/CycleCounter.hpp>
 #include <OledDisplay.hpp>
-#include <CycleCounter.hpp>
 
 #include <EmbeddedGfx/Circle.hpp>
 #include <EmbeddedGfx/Triangle.hpp>

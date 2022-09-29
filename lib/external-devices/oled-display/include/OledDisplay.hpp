@@ -3,10 +3,9 @@
 
 #include <cstdint>
 #include <cstddef>
-#include <I2C.hpp>
 
+#include <STM32F4x1/I2C.hpp>
 #include <EmbeddedGfx/BufferedCanvas.hpp>
-
 
 namespace Devices
 {

@@ -1,4 +1,4 @@
-#include "GeneralPurposeTimer.hpp"
+#include "STM32F4x1/GeneralPurposeTimer.hpp"
 
 namespace Stm32
 {

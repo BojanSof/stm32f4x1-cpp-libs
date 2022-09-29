@@ -1,9 +1,10 @@
 // Software PWM using timer interrupts
-#include <Gpio.hpp>
-#include <Clock.hpp>
-#include <GeneralPurposeTimer.hpp>
+#include <STM32F4x1/Gpio.hpp>
+#include <STM32F4x1/Clock.hpp>
+#include <STM32F4x1/GeneralPurposeTimer.hpp>
+#include <STM32F4x1/CycleCounter.hpp>
+
 #include <SevenSegmentDisplay.hpp>
-#include <CycleCounter.hpp>
 
 using namespace Stm32;
 

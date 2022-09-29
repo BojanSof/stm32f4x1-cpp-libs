@@ -1,9 +1,9 @@
 #ifndef STM32_GPIO_ALTERNATE_FUNCTIONS_HPP
 #define STM32_GPIO_ALTERNATE_FUNCTIONS_HPP
 
-#include "GpioTypes.hpp"
-
 #include <cstdint>
+
+#include "GpioTypes.hpp"
 
 namespace Stm32
 {

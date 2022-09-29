@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstddef>
 
-#include <Gpio.hpp>
+#include <STM32F4x1/Gpio.hpp>
 
 namespace Devices{
 

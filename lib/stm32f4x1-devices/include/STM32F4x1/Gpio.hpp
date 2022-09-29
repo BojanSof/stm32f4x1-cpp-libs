@@ -1,16 +1,15 @@
 #ifndef STM32F401_GPIO_HPP
 #define STM32F401_GPIO_HPP
 
-#include "GpioTypes.hpp"
-#include "GpioAlternateFunctions.hpp"
-#include "ExternalInterruptController.hpp"
-
 #include <stm32f4xx.h>
 #include <bitset>
 #include <cstdint>
 #include <functional>
 #include <tuple>
 
+#include "GpioTypes.hpp"
+#include "GpioAlternateFunctions.hpp"
+#include "ExternalInterruptController.hpp"
 
 namespace Stm32
 {

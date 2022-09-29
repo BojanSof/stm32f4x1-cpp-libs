@@ -1,9 +1,9 @@
 #ifndef STM32_GPIO_TYPES_HPP
 #define STM32_GPIO_TYPES_HPP
 
-#include <stm32f4xx.h>
-
 #include <cstdint>
+
+#include <stm32f4xx.h>
 
 namespace Stm32
 {

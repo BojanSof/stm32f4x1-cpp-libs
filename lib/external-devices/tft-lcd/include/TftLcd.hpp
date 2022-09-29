@@ -3,9 +3,9 @@
 
 #include <cstdint>
 #include <cstddef>
-#include <Gpio.hpp>
-#include <CycleCounter.hpp>
 
+#include <STM32F4x1/Gpio.hpp>
+#include <STM32F4x1/CycleCounter.hpp>
 #include <EmbeddedGfx/UnbufferedCanvas.hpp>
 
 namespace Devices

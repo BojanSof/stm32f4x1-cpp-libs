@@ -2,9 +2,10 @@
 #define STM32_I2C_RECEIVE_FSM_HPP
 
 #include <cstdint>
+
 #include <stm32f4xx.h>
 
-#include <FsmGenerator.hpp>
+#include <FsmGenerator/FsmGenerator.hpp>
 
 namespace Stm32
 {

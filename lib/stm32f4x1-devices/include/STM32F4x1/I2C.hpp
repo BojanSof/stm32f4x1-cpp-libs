@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <tuple>
+
 #include <stm32f4xx.h>
 
 #include "ComInterface.hpp"
