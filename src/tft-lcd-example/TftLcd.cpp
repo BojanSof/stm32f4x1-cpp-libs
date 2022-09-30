@@ -1,3 +1,5 @@
+#define SPI_DISPLAY 1
+
 #include <cstdio>
 #include <chrono>
 #include <type_traits>
@@ -7,7 +9,11 @@
 #include <STM32F4x1/SPI.hpp>
 #include <STM32F4x1/CycleCounter.hpp>
 
-#include <TftLcd.hpp>
+#if SPI_DISPLAY == 1
+#include <TftLcdSpi.hpp>
+#else
+#include <TftLcdGpio.hpp>
+#endif
 #include <Touch.hpp>
 
 #include <EmbeddedGfx/Circle.hpp>
@@ -23,7 +29,21 @@ int main()
   CycleCounter::delay(200ms);
   static constexpr size_t width = 320;
   static constexpr size_t height = 480;
-  using TftDisplay = Devices::TftLcd<
+#if SPI_DISPLAY == 1
+  using TftDisplay = Devices::TftLcdSpi<
+      320
+    , 480
+    , Pins::PA15
+    , Pins::PA9
+    , Pins::PA12
+    , Pins::PA8
+    , Pins::PB5
+    , Pins::PB4
+    , Pins::PB3
+    , SPI<1>
+  >;
+#else
+  using TftDisplay = Devices::TftLcdGpio<
       320
     , 480
     , Pins::PA8
@@ -41,6 +61,7 @@ int main()
     , Pins::PA6
     , Pins::PA7
   >;
+#endif
   TftDisplay lcd;
   using MosiPin = Pins::PB15;
   using MisoPin = Pins::PB14;
@@ -85,7 +106,8 @@ int main()
       const size_t yDisplay = height - y*height / 4095;
       canvas.setPixel(xDisplay, yDisplay, Colors::White);
     }
-    // CycleCounter::delay(200ms);
+
+    // CycleCounter::delay(500ms);
   }
 
   return 0;

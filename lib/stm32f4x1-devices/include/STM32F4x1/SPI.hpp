@@ -243,7 +243,7 @@ namespace Stm32
         iRead = iWrite = 0;
         transferCallback_ = [this, bufferRead, callbackRead, bufferWrite, callbackWrite, bytesToTransfer, &actualTransfer]()
         {
-          if(spiInstance_->SR & SPI_SR_TXE)
+          if((spiInstance_->CR2 & SPI_CR2_TXEIE) && (spiInstance_->SR & SPI_SR_TXE))
           {
             errorStatus_ = SpiError::NoError;
             if(iWrite < bytesToTransfer)
@@ -270,7 +270,7 @@ namespace Stm32
               if(callbackWrite) callbackWrite();
             }
           }
-          if(spiInstance_->SR & SPI_SR_RXNE)
+          if((spiInstance_->CR2 & SPI_CR2_RXNEIE) && (spiInstance_->SR & SPI_SR_RXNE))
           {
             errorStatus_ = SpiError::NoError;
             if(iRead < bytesToTransfer)
@@ -280,7 +280,7 @@ namespace Stm32
                 // dummy read
                 (void)spiInstance_->DR;
               }
-              if(frameSize16Bits_)
+              else if(frameSize16Bits_)
               {
                 *reinterpret_cast<uint16_t*>(bufferRead + iRead) = static_cast<uint16_t>(spiInstance_->DR);
               }
