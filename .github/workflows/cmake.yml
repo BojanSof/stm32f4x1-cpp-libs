@@ -1,0 +1,50 @@
+name: CMake
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: 'latest'
+
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        version: 1.10.0
+
+    - name: Build Debug targets for STM32F401
+      run: |
+        cmake --preset stm32f401 -DSTM32F4X1_GENERATE_FLASH_TARGETS=OFF
+        cmake --build --preset debug-stm32f401
+    
+    - name: Build Release targets for STM32F401
+      run: |
+        cmake --preset stm32f401 -DSTM32F4X1_GENERATE_FLASH_TARGETS=OFF
+        cmake --build --preset release-stm32f401
+    
+    - name: Build Debug targets for STM32F411
+      run: |
+        cmake --preset stm32f411 -DSTM32F4X1_GENERATE_FLASH_TARGETS=OFF
+        cmake --build --preset debug-stm32f411
+    
+    - name: Build Release targets for STM32F411
+      run: |
+        cmake --preset stm32f411 -DSTM32F4X1_GENERATE_FLASH_TARGETS=OFF
+        cmake --build --preset release-stm32f411
