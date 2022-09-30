@@ -1,0 +1,55 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "STM32F401 Cortex Debug ST-link",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "stlink",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "device": "STM32F401CC",
+      "v1": false,
+      "interface": "swd",
+      "svdFile": "${workspaceFolder}/svd/STM32F401.svd",
+      "runToEntryPoint": "main"
+    },
+    {
+      "name": "STM32F401 Cortex Debug JLink",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "servertype": "jlink",
+      "device": "STM32F401CC",
+      "interface": "swd",
+      "svdFile": "${workspaceFolder}/svd/STM32F401.svd",
+      "runToEntryPoint": "main"
+    },
+    {
+      "name": "STM32F411 Cortex Debug ST-link",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "stlink",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "device": "STM32F411CE",
+      "v1": false,
+      "interface": "swd",
+      "svdFile": "${workspaceFolder}/svd/STM32F411.svd",
+      "runToEntryPoint": "main"
+    },
+    {
+      "name": "STM32F411 Cortex Debug JLink",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "servertype": "jlink",
+      "device": "STM32F411CE",
+      "interface": "swd",
+      "svdFile": "${workspaceFolder}/svd/STM32F411.svd",
+      "runToEntryPoint": "main"
+    }
+  ]
+}

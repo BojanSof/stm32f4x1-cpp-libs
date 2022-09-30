@@ -1,0 +1,104 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 18,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "stm32f4x1",
+      "hidden": true,
+      "description": "Target library and projects for STM32F4x1 MCU.",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "architecture": {
+        "value": "arm64",
+        "strategy": "external"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "${sourceDir}/cmake/stm32_gcc.cmake",
+          "type": "FILEPATH"
+        },
+        "STM32F4X1_GENERATE_FLASH_TARGETS": "ON"
+      }
+    },
+    {
+      "name": "stm32f401",
+      "description": "Target library and projects for STM32F401CC MCU.",
+      "inherits": "stm32f4x1",
+      "cacheVariables": {
+        "DEVICE": "STM32F401CC"
+      }
+    },
+    {
+      "name": "stm32f411",
+      "description": "Target library and projects for STM32F411CE MCU.",
+      "inherits": "stm32f4x1",
+      "cacheVariables": {
+        "DEVICE": "STM32F411CE"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug-stm32f401",
+      "displayName": "Debug",
+      "configurePreset": "stm32f401",
+      "inheritConfigureEnvironment": true,
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-stm32f401",
+      "displayName": "Release",
+      "configurePreset": "stm32f401",
+      "inheritConfigureEnvironment": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "clean-release-stm32f401",
+      "displayName": "Clean Release",
+      "inherits": "release-stm32f401",
+      "cleanFirst": true
+    },
+    {
+      "name": "release-with-debug-info-stm32f401",
+      "displayName": "Release with Debug info",
+      "configurePreset": "stm32f401",
+      "inheritConfigureEnvironment": true,
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "debug-stm32f411",
+      "displayName": "Debug",
+      "configurePreset": "stm32f411",
+      "inheritConfigureEnvironment": true,
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-stm32f411",
+      "displayName": "Release",
+      "configurePreset": "stm32f411",
+      "inheritConfigureEnvironment": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "clean-release-stm32f411",
+      "displayName": "Clean Release",
+      "inherits": "release-stm32f411",
+      "cleanFirst": true
+    },
+    {
+      "name": "release-with-debug-info-stm32f411",
+      "displayName": "Release with Debug info",
+      "configurePreset": "stm32f411",
+      "inheritConfigureEnvironment": true,
+      "configuration": "RelWithDebInfo"
+    }
+  ]
+}
