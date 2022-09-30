@@ -81,7 +81,7 @@ namespace Stm32
     , bool LSBfirst
     , typename PinsT
     , bool HardwareSs
-    , bool UserControlsSs = false>
+    >
   struct SpiConfig
   {
     static constexpr uint32_t clockFrequency = ClockFrequency;
@@ -89,7 +89,6 @@ namespace Stm32
     static constexpr auto spiMode = Mode;
     static constexpr bool frameSize16Bits = FrameSize16Bits;
     static constexpr bool lsbFirst = LSBfirst;
-    static constexpr bool userControlsSs = UserControlsSs;
     using pinsT = PinsT;
   };
 
@@ -203,22 +202,17 @@ namespace Stm32
           spiInstance_->CR1 &= ~SPI_CR1_SSM;
           spiInstance_->CR2 |= SPI_CR2_SSOE;
           setSsLevel_ = nullptr;
-          userControlsSs_ = false;
         }
         else
         {
-          userControlsSs_ = config.userControlsSs;
           spiInstance_->CR1 |= SPI_CR1_SSM;
           spiInstance_->CR1 |= SPI_CR1_SSI;
-          if(!userControlsSs_)
-          {
-            setSsLevel_ = [](const bool level){
-              using PinsT = typename SPIconfigT::pinsT;
-              using SsPinT = typename PinsT::ssPin;
-              SsPinT ss;
-              ss.setLevel(level);
-            };
-          }
+          setSsLevel_ = [](const bool level){
+            using PinsT = typename SPIconfigT::pinsT;
+            using SsPinT = typename PinsT::ssPin;
+            SsPinT ss;
+            ss.setLevel(level);
+          };
         }
       }
 
@@ -249,20 +243,25 @@ namespace Stm32
         iRead = iWrite = 0;
         transferCallback_ = [this, bufferRead, callbackRead, bufferWrite, callbackWrite, bytesToTransfer, &actualTransfer]()
         {
-          if((spiInstance_->CR2 & SPI_CR2_TXEIE) && (spiInstance_->SR & SPI_SR_TXE))
+          if(spiInstance_->SR & SPI_SR_TXE)
           {
             errorStatus_ = SpiError::NoError;
             if(iWrite < bytesToTransfer)
             {
-              if(frameSize16Bits_)
+              if(bufferWrite == nullptr)
+              {
+                // dummy write
+                spiInstance_->DR = 0;
+              }
+              else if(frameSize16Bits_)
               {
                 spiInstance_->DR = *reinterpret_cast<const uint16_t*>(bufferWrite + iWrite);
-                iWrite += sizeof(uint16_t);
               }
               else
               {
-                spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite++]);
+                spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite]);
               }
+              iWrite += (frameSize16Bits_) ? sizeof(uint16_t) : sizeof(uint8_t);
               actualTransfer = iWrite;
             }
             else if(iWrite == bytesToTransfer)
@@ -271,20 +270,25 @@ namespace Stm32
               if(callbackWrite) callbackWrite();
             }
           }
-          if((spiInstance_->CR2 & SPI_CR2_RXNEIE) && (spiInstance_->SR & SPI_SR_RXNE))
+          if(spiInstance_->SR & SPI_SR_RXNE)
           {
             errorStatus_ = SpiError::NoError;
             if(iRead < bytesToTransfer)
             {
+              if(bufferRead == nullptr)
+              {
+                // dummy read
+                (void)spiInstance_->DR;
+              }
               if(frameSize16Bits_)
               {
                 *reinterpret_cast<uint16_t*>(bufferRead + iRead) = static_cast<uint16_t>(spiInstance_->DR);
-                iRead += sizeof(uint16_t);
               }
               else
               {
-                bufferRead[iRead++] = static_cast<std::byte>(spiInstance_->DR);
+                bufferRead[iRead] = static_cast<std::byte>(spiInstance_->DR);
               }
+              iRead += (frameSize16Bits_) ? sizeof(uint16_t) : sizeof(uint8_t);
               // actualTransfer = iRead;
             }
             else if(iRead == bytesToTransfer)
@@ -294,12 +298,12 @@ namespace Stm32
             }
           }
           
-          bool writeFinished = (bufferWrite != nullptr && iWrite == bytesToTransfer) || (bufferWrite == nullptr);
-          bool readFinished = (bufferRead != nullptr && iRead == bytesToTransfer) || (bufferRead == nullptr);
+          bool writeFinished = (iWrite == bytesToTransfer);
+          bool readFinished = (iRead == bytesToTransfer);
           if(writeFinished && readFinished)
           {
             // if using software SS
-            if(!userControlsSs_ && setSsLevel_)
+            if(setSsLevel_)
             {
               // set SS high
               setSsLevel_(true);
@@ -312,37 +316,34 @@ namespace Stm32
         // start clock
         enable();
         // if using software SS
-        if(!userControlsSs_ && setSsLevel_)
+        if(setSsLevel_)
         {
           // set SS low
           setSsLevel_(false);
         }
         // send initial data to kick-start transfer
-        if(bufferWrite != nullptr)
+        if(bufferWrite == nullptr)
+        {
+          spiInstance_->DR = 0;
+        }
+        else
         {
           if(frameSize16Bits_)
           {
             spiInstance_->DR = *reinterpret_cast<const uint16_t*>(bufferWrite + iWrite);
-            iWrite += sizeof(uint16_t);
           }
           else
           {
-            spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite++]);
+            spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite]);
           }
-          actualTransfer = iWrite;
         }
+        iWrite += (frameSize16Bits_) ? sizeof(uint16_t) : sizeof(uint8_t);
+        actualTransfer = iWrite;
         transferInProgress_ = true;
         
         // enable interrupts
-        if(bufferRead != nullptr)
-        {
-          enableRxIrq();
-        }
-
-        if(bufferWrite != nullptr)
-        {
-          enableTxIrq();
-        }
+        enableRxIrq();
+        enableTxIrq();
         return true;                
       }
 
@@ -695,7 +696,6 @@ namespace Stm32
       volatile SpiError errorStatus_;
       bool frameSize16Bits_ = false;
       std::function<void(bool)> setSsLevel_ = nullptr;
-      bool userControlsSs_ = false;
       CallbackT userErrorCallback_;
     public:
       inline static CallbackT transferCallback_;
