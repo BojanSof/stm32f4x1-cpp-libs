@@ -13,9 +13,9 @@ int main()
   while(true)
   {
     ledPin.setLevel(true);
-    CycleCounter::delay<>(1s);
+    CycleCounter::delay(1s);
     ledPin.setLevel(false);
-    CycleCounter::delay<>(1s);
+    CycleCounter::delay(1s);
   }
 
   return 0;
