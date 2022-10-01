@@ -51,7 +51,8 @@
     "iostream": "cpp",
     "istream": "cpp",
     "sstream": "cpp",
-    "bitset": "cpp"
+    "bitset": "cpp",
+    "cstring": "cpp"
   },
   "cortex-debug.variableUseNaturalFormat": false
 }

@@ -24,13 +24,16 @@ namespace Devices
     , typename D7PinT
   >
   class TftLcdGpio
-    : public TftLcd<Width, Height, CsPinT, DcPinT, RstPinT, BlPinT>
+    : public TftLcd<Width, Height, CsPinT, DcPinT, RstPinT, BlPinT
+                  , TftLcdGpio<Width, Height, CsPinT, DcPinT, RstPinT, RdPinT, WrPinT, BlPinT
+                              , D0PinT, D1PinT, D2PinT, D3PinT, D4PinT, D5PinT, D6PinT, D7PinT> >
   {
-    using BaseT = TftLcd<Width, Height, CsPinT, DcPinT, RstPinT, BlPinT>;
+    using BaseT = TftLcd<Width, Height, CsPinT, DcPinT, RstPinT, BlPinT, TftLcdGpio>;
+    friend BaseT;
     public:
       TftLcdGpio() { }
 
-      void init() final
+      void init()
       {
         using namespace std::chrono_literals;
         // configure pins
@@ -48,30 +51,48 @@ namespace Devices
         static constexpr uint8_t params4[] = {0x00, 0x08};
         writeCmd(InitCmd4, params4, sizeof(params4));
         static constexpr uint8_t params5[] = {0x08};
-        writeCmd(BaseT::MemoryAccessControlCmd, params5, sizeof(params5));
+        writeCmd(TftLcdCommands::MemoryAccessControl, params5, sizeof(params5));
         static constexpr uint8_t params6[] = {0x00};
-        writeCmd(BaseT::DisplayInversionCmd, params6, sizeof(params6));
+        writeCmd(TftLcdCommands::DisplayInversion, params6, sizeof(params6));
         static constexpr uint8_t params7[] = {0x47};
-        writeCmd(BaseT::PowerControl2Cmd, params7, sizeof(params7));
+        writeCmd(TftLcdCommands::PowerControl2, params7, sizeof(params7));
         static constexpr uint8_t params8[] = {0x00, 0xAF, 0x80, 0x00};
-        writeCmd(BaseT::VcomControlCmd, params8, sizeof(params8));
+        writeCmd(TftLcdCommands::VcomControl, params8, sizeof(params8));
         static constexpr uint8_t params9[] = {0x0F, 0x1F, 0x1C, 0x0C, 0x0F, 0x08, 0x48, 0x98, 0x37, 0x0A, 0x13, 0x04, 0x11, 0x0D, 0x00};
-        writeCmd(BaseT::PositiveGammaControlCmd, params9, sizeof(params9)); 
+        writeCmd(TftLcdCommands::PositiveGammaControl, params9, sizeof(params9)); 
         static constexpr uint8_t params10[] = {0x0F, 0x32, 0x2E, 0x0B, 0x0D, 0x05, 0x47, 0x75, 0x37, 0x06, 0x10, 0x03, 0x24, 0x20, 0x00};
-        writeCmd(BaseT::NegativeGammaCorrectionCmd, params10, sizeof(params10));
+        writeCmd(TftLcdCommands::NegativeGammaCorrection, params10, sizeof(params10));
         static constexpr uint8_t params11[] = {0x55};
-        writeCmd(BaseT::InterfacePixelFormatCmd, params11, sizeof(params11));
-        writeCmd(BaseT::SleepOutCmd);
+        writeCmd(TftLcdCommands::InterfacePixelFormat, params11, sizeof(params11));
+        writeCmd(TftLcdCommands::SleepOut);
         static constexpr uint8_t params12[] = {0x28};
-        writeCmd(BaseT::MemoryAccessControlCmd, params12, sizeof(params12));
+        writeCmd(TftLcdCommands::MemoryAccessControl, params12, sizeof(params12));
         Stm32::CycleCounter::delay(120ms);
         static constexpr uint8_t params13[] = {(1<<6)|(1<<3)};
-        writeCmd(BaseT::MemoryAccessControlCmd, params13, sizeof(params13));
-        writeCmd(BaseT::DisplayOn);
+        writeCmd(TftLcdCommands::MemoryAccessControl, params13, sizeof(params13));
+        writeCmd(TftLcdCommands::DisplayOn);
 
         BaseT::setBacklight(true);
         Stm32::CycleCounter::delay(4s);
-        BaseT::clear(0x5050);
+        clear(0x5050);
+      }
+
+      void setPixel(const size_t x, const size_t y, uint16_t value)
+      {
+        // set position for writing
+        BaseT::setCursor(x, y);
+        // set data
+        writeCmd(TftLcdCommands::MemoryWrite, reinterpret_cast<const uint8_t*>(&value), 1);
+      }
+
+      void clear(const uint16_t color)
+      {
+        BaseT::setWindow(0, 0, Width - 1, Height - 1);
+        writeCmd(TftLcdCommands::MemoryWrite);
+        for(size_t i = 0; i < Width * Height; ++i)
+        {
+          writeData(reinterpret_cast<const uint8_t*>(&color), sizeof(uint8_t));
+        }
       }
 
     private:
@@ -116,7 +137,7 @@ namespace Devices
           , D7PinT>(0b0000000011);          
       }
 
-      void writeCmd(const uint8_t cmd, const uint8_t * const cmdParams = nullptr, const size_t numParams = 0) final
+      void writeCmd(const uint8_t cmd, const uint8_t * const cmdParams = nullptr, const size_t numParams = 0)
       {
         using namespace std::chrono_literals;
         BaseT::dcPin_.setLevel(false);
@@ -151,7 +172,7 @@ namespace Devices
         BaseT::csPin_.setLevel(true);
       }
 
-      void writeData(const uint8_t * const data, const size_t size) final
+      void writeData(const uint8_t * const data, const size_t size)
       {
         using namespace std::chrono_literals;
         BaseT::dcPin_.setLevel(true);

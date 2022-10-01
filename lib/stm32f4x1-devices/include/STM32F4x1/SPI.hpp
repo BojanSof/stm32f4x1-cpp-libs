@@ -326,16 +326,13 @@ namespace Stm32
         {
           spiInstance_->DR = 0;
         }
+        else if(frameSize16Bits_)
+        {
+          spiInstance_->DR = *reinterpret_cast<const uint16_t*>(bufferWrite + iWrite);
+        }
         else
         {
-          if(frameSize16Bits_)
-          {
-            spiInstance_->DR = *reinterpret_cast<const uint16_t*>(bufferWrite + iWrite);
-          }
-          else
-          {
-            spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite]);
-          }
+          spiInstance_->DR = static_cast<uint8_t>(bufferWrite[iWrite]);
         }
         iWrite += (frameSize16Bits_) ? sizeof(uint16_t) : sizeof(uint8_t);
         actualTransfer = iWrite;

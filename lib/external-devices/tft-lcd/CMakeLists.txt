@@ -6,6 +6,7 @@ add_library(${TARGET} INTERFACE)
 target_sources(${TARGET}
   INTERFACE
     "include/TftLcd.hpp"
+    "include/TftLcdCommands.hpp"
     "include/TftLcdGpio.hpp"
     "include/TftLcdSpi.hpp"
     "include/Touch.hpp"

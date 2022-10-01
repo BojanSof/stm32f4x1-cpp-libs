@@ -1,4 +1,4 @@
-#define SPI_DISPLAY 1
+#define SPI_DISPLAY 0  //< 1 to use SPI interface, 0 for GPIO interface, corresponding to display type
 
 #include <cstdio>
 #include <chrono>
@@ -102,8 +102,13 @@ int main()
       Text<100, Font<6, 8>, CanvasT> text{buf, {10, 0}};
       text.setColor(Colors::White);
       canvas.draw(text);
+#if SPI_DISPLAY == 1
+      const size_t xDisplay = width - x*width / 4095;
+      const size_t yDisplay = y*height / 4095;
+#else
       const size_t xDisplay = x*width / 4095;
       const size_t yDisplay = height - y*height / 4095;
+#endif
       canvas.setPixel(xDisplay, yDisplay, Colors::White);
     }
 
