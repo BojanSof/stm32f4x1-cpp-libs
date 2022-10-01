@@ -20,7 +20,9 @@ namespace Devices
   };
 
   template<
-      typename SpiInterfaceT
+      size_t Width
+    , size_t Height
+    , typename SpiInterfaceT
     , typename MosiPinT
     , typename MisoPinT
     , typename SckPinT
@@ -89,13 +91,42 @@ namespace Devices
         return TouchCoordinates<uint16_t>{x, y, z};
       }
 
+      void setOrientation(const bool flipX = false, const bool flipY = false)
+      {
+        flipX_ = flipX;
+        flipY_ = flipY;
+      }
+
+      std::optional<TouchCoordinates<uint16_t>> getCoordinates()
+      {
+        auto rawData = readRawData();
+        if(rawData.has_value())
+        {
+          auto rawCoordinates = rawData.value();
+          return TouchCoordinates<uint16_t>{
+              (flipX_) ? (Width - rawCoordinates.x * Width / maxRawValue) : rawCoordinates.x * Width / maxRawValue
+            , (flipY_) ? (Height - rawCoordinates.y * Height / maxRawValue) : rawCoordinates.y * Height / maxRawValue
+            , rawCoordinates.z
+          };
+        }
+        else
+        {
+          return std::nullopt;
+        }
+      }
+
     private:
+      bool flipX_ = false;
+      bool flipY_ = false;
+      // commands
       static constexpr uint8_t ReadZ1Cmd  = 0xB0;
       static constexpr uint8_t ReadZ2Cmd  = 0xC0;
       static constexpr uint8_t ReadXCmd   = 0xD0;
       static constexpr uint8_t ReadYCmd   = 0x90;
-
+      // thresholds
       static constexpr uint16_t zThreshold = 300;
+      // constants
+      static constexpr uint16_t maxRawValue = 4095;
   };
 }
 

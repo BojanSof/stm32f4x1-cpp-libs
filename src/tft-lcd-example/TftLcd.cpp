@@ -31,8 +31,8 @@ int main()
   static constexpr size_t height = 480;
 #if SPI_DISPLAY == 1
   using TftDisplay = Devices::TftLcdSpi<
-      320
-    , 480
+      width
+    , height
     , Pins::PA15
     , Pins::PA9
     , Pins::PA12
@@ -44,8 +44,8 @@ int main()
   >;
 #else
   using TftDisplay = Devices::TftLcdGpio<
-      320
-    , 480
+      width
+    , height
     , Pins::PA8
     , Pins::PA9
     , Pins::PA12
@@ -68,7 +68,9 @@ int main()
   using SckPin = Pins::PB13;
   using SsPin = Pins::PB12;
   using Touch = Devices::Touch<
-      SPI<2>
+      width
+    , height
+    , SPI<2>
     , MosiPin
     , MisoPin
     , SckPin
@@ -79,6 +81,13 @@ int main()
   lcd.setBacklight(true);
   auto& canvas = lcd.getCanvas();
   using CanvasT = std::remove_reference_t<decltype(canvas)>;
+
+#if SPI_DISPLAY == 1
+  touch.setOrientation(true, false);
+#else
+  touch.setOrientation(false, true);
+#endif
+
   Circle<CanvasT> circle{200, 200, 30};
   circle.setOutlineColor(Colors::White);
   canvas.draw(circle);
@@ -93,7 +102,7 @@ int main()
   
   while(true)
   {
-    const auto touchData = touch.readRawData();
+    const auto touchData = touch.getCoordinates();
     if(touchData.has_value())
     {
       const auto& [x, y, z] = touchData.value();
@@ -102,14 +111,7 @@ int main()
       Text<100, Font<6, 8>, CanvasT> text{buf, {10, 0}};
       text.setColor(Colors::White);
       canvas.draw(text);
-#if SPI_DISPLAY == 1
-      const size_t xDisplay = width - x*width / 4095;
-      const size_t yDisplay = y*height / 4095;
-#else
-      const size_t xDisplay = x*width / 4095;
-      const size_t yDisplay = height - y*height / 4095;
-#endif
-      canvas.setPixel(xDisplay, yDisplay, Colors::White);
+      canvas.setPixel(x, y, Colors::White);
     }
 
     // CycleCounter::delay(500ms);
