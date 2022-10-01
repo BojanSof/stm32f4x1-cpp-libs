@@ -104,8 +104,8 @@ namespace Devices
         {
           auto rawCoordinates = rawData.value();
           return TouchCoordinates<uint16_t>{
-              (flipX_) ? (Width - rawCoordinates.x * Width / maxRawValue) : rawCoordinates.x * Width / maxRawValue
-            , (flipY_) ? (Height - rawCoordinates.y * Height / maxRawValue) : rawCoordinates.y * Height / maxRawValue
+              static_cast<uint16_t>((flipX_) ? (Width - rawCoordinates.x * Width / maxRawValue) : rawCoordinates.x * Width / maxRawValue)
+            , static_cast<uint16_t>((flipY_) ? (Height - rawCoordinates.y * Height / maxRawValue) : rawCoordinates.y * Height / maxRawValue)
             , rawCoordinates.z
           };
         }
