@@ -1,4 +1,4 @@
-#define SPI_DISPLAY 0  //< 1 to use SPI interface, 0 for GPIO interface, corresponding to display type
+#define SPI_DISPLAY 1  //< 1 to use SPI interface, 0 for GPIO interface, corresponding to display type
 
 #include <cstdio>
 #include <chrono>

@@ -102,6 +102,16 @@ namespace Devices
         writeCmd(TftLcdCommands::PageAddressSet, params2, sizeof(params2));
       }
 
+      void setOrientation(const bool my, const bool mx, const bool mv, const bool bgr)
+      {
+        using namespace TftLcdCommands;
+        uint8_t param = (bgr ? MemoryAccessControlBGR : 0)
+                      | (my ? MemoryAccessControlMY : 0)
+                      | (mx ? MemoryAccessControlMX : 0)
+                      | (mv ? MemoryAccessControlMV : 0);
+        writeCmd(MemoryAccessControl, &param, sizeof(param));
+      }
+
     protected:
       void writeCmd(const uint8_t cmd, const uint8_t * const cmdParams = nullptr, const size_t numParams = 0)
       {

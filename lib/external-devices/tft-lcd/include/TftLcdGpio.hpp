@@ -95,6 +95,20 @@ namespace Devices
         }
       }
 
+      void setOrientation(const bool flip = false)
+      {
+        if constexpr (Width > Height)
+        {
+          // landscape mode
+          BaseT::setOrientation(flip, flip, true, true);
+        }
+        else
+        {
+          // portrait mode
+          BaseT::setOrientation(flip, !flip, false, true);
+        }
+      }
+
     private:
       void configurePins()
       {

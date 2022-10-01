@@ -81,8 +81,7 @@ namespace Devices
         writeCmd(TftLcdCommands::NegativeGammaCorrection, params13, sizeof(params13));
         writeCmd(TftLcdCommands::SleepOut);
         Stm32::CycleCounter::delay(120ms);
-        static constexpr uint8_t params14[] = {(1<<3)|(1<<6)|(1<<7)};
-        writeCmd(TftLcdCommands::MemoryAccessControl, params14, sizeof(params14));
+        setOrientation(true);
         writeCmd(TftLcdCommands::DisplayOn);
 
         BaseT::setBacklight(true);
@@ -117,6 +116,21 @@ namespace Devices
         byteData = value << 3;
         writeData(&byteData, sizeof(byteData));
       }
+
+      void setOrientation(const bool flip = false)
+      {
+        if constexpr (Width > Height)
+        {
+          // landscape mode
+          BaseT::setOrientation(flip, !flip, true, true);
+        }
+        else
+        {
+          // portrait mode
+          BaseT::setOrientation(flip, flip, false, true);
+        }
+      }
+      
     private:
       void writeCmd(const uint8_t cmd, const uint8_t * const cmdParams = nullptr, const size_t numParams = 0)
       {
