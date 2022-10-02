@@ -101,12 +101,12 @@ namespace Devices
         writeCmd(TftLcdCommands::MemoryWrite);
         for(size_t i = 0; i < Width * Height; ++i)
         {
-          uint8_t byteData = (color >> 8) & 0xF8;
-          writeData(&byteData, sizeof(byteData));
-          byteData = (color >> 3) & 0xFC;
-          writeData(&byteData, sizeof(byteData));
-          byteData = color << 3;
-          writeData(&byteData, sizeof(byteData));
+          const uint8_t colorBytes[] = {
+              static_cast<uint8_t>(color >> 16)
+            , static_cast<uint8_t>(color >> 8)
+            , static_cast<uint8_t>(color)
+          };
+          writeData(colorBytes, sizeof(colorBytes));
         }
       }
 
@@ -116,12 +116,12 @@ namespace Devices
         BaseT::setCursor(x, y);
         // set data
         writeCmd(TftLcdCommands::MemoryWrite);
-        uint8_t byteData = (value >> 8) & 0xF8;
-        writeData(&byteData, sizeof(byteData));
-        byteData = (value >> 3) & 0xFC;
-        writeData(&byteData, sizeof(byteData));
-        byteData = value << 3;
-        writeData(&byteData, sizeof(byteData));
+        const uint8_t colorBytes[] = {
+              static_cast<uint8_t>(value >> 16)
+            , static_cast<uint8_t>(value >> 8)
+            , static_cast<uint8_t>(value)
+          };
+        writeData(colorBytes, sizeof(colorBytes));
       }
 
       void setOrientation(const bool flip = false)
