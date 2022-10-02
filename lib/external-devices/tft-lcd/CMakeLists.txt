@@ -10,6 +10,7 @@ target_sources(${TARGET}
     "include/TftLcdGpio.hpp"
     "include/TftLcdSpi.hpp"
     "include/Touch.hpp"
+    "include/TouchCalibration.hpp"
 )
 
 target_include_directories(${TARGET}
