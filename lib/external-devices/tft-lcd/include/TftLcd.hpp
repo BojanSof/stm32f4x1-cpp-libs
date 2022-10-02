@@ -8,7 +8,6 @@
 
 #include <STM32F4x1/Gpio.hpp>
 #include <STM32F4x1/CycleCounter.hpp>
-#include <EmbeddedGfx/UnbufferedCanvas.hpp>
 
 namespace Devices
 {
@@ -24,31 +23,10 @@ namespace Devices
   class TftLcd
   {   
     public:
-      using CanvasT =  EmbeddedGfx::UnbufferedCanvas<
-                            Width, Height
-                          , EmbeddedGfx::CanvasType::Normal
-                          , EmbeddedGfx::ColorType::RGB565
-                          , TftLcd>;
-    public:
-      TftLcd() : canvas_{*this}
-      { }
-
       void init()
       {
         static_cast<TftLcdDerivedT&>(*this).init();
       }
-
-      void setPixel(const size_t x, const size_t y, uint16_t value)
-      {
-        static_cast<TftLcdDerivedT&>(*this).setPixel(x, y, value);
-      }
-
-      void clear(uint16_t value)
-      {
-        static_cast<TftLcdDerivedT&>(*this).clear(value);
-      }
-
-      CanvasT& getCanvas() { return canvas_; }
       
       void reset()
       {
@@ -144,7 +122,6 @@ namespace Devices
           , BlPinT>(0b0111);   
       }
     protected:
-      CanvasT canvas_;
       CsPinT csPin_;
       DcPinT dcPin_;
       RstPinT rstPin_;

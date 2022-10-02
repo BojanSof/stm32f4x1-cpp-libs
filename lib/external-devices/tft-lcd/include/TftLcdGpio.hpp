@@ -3,6 +3,8 @@
 
 #include "TftLcd.hpp"
 
+#include <EmbeddedGfx/UnbufferedCanvas.hpp>
+
 namespace Devices
 {
   template<
@@ -30,8 +32,14 @@ namespace Devices
   {
     using BaseT = TftLcd<Width, Height, CsPinT, DcPinT, RstPinT, BlPinT, TftLcdGpio>;
     friend BaseT;
+    using CanvasT = EmbeddedGfx::UnbufferedCanvas<
+                            Width, Height
+                          , EmbeddedGfx::CanvasType::Normal
+                          , EmbeddedGfx::RGB565
+                          , TftLcdGpio>;
     public:
-      TftLcdGpio() { }
+      TftLcdGpio() : canvas_{*this}
+      { }
 
       void init()
       {
@@ -108,6 +116,8 @@ namespace Devices
           BaseT::setOrientation(flip, !flip, false, true);
         }
       }
+
+      CanvasT& getCanvas() { return canvas_; }
 
     private:
       void configurePins()
@@ -208,6 +218,7 @@ namespace Devices
         BaseT::csPin_.setLevel(true);
       }
     private:
+      CanvasT canvas_;
       RdPinT rdPin_;
       WrPinT wrPin_;
       D0PinT d0Pin_;

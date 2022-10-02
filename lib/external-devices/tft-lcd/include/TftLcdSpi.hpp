@@ -7,6 +7,7 @@
 
 #include <STM32F4x1/SPI.hpp>
 #include <STM32F4x1/CycleCounter.hpp>
+#include <EmbeddedGfx/UnbufferedCanvas.hpp>
 
 namespace Devices
 {
@@ -28,8 +29,14 @@ namespace Devices
   {
     using BaseT = TftLcd<Width, Height, CsPinT, DcPinT, RstPinT, BlPinT, TftLcdSpi>;
     friend BaseT;
+    using CanvasT = EmbeddedGfx::UnbufferedCanvas<
+                            Width, Height
+                          , EmbeddedGfx::CanvasType::Normal
+                          , EmbeddedGfx::RGB666
+                          , TftLcdSpi>;
     public:
-      TftLcdSpi() { }
+      TftLcdSpi() : canvas_{*this}
+      { }
 
       void init()
       {
@@ -85,10 +92,10 @@ namespace Devices
         writeCmd(TftLcdCommands::DisplayOn);
 
         BaseT::setBacklight(true);
-        clear(0xABCD);
+        clear(0);
       }
 
-      void clear(const uint16_t color)
+      void clear(const uint32_t color)
       {
         BaseT::setWindow(0, 0, Width - 1, Height - 1);
         writeCmd(TftLcdCommands::MemoryWrite);
@@ -103,7 +110,7 @@ namespace Devices
         }
       }
 
-      void setPixel(const size_t x, const size_t y, uint16_t value)
+      void setPixel(const size_t x, const size_t y, uint32_t value)
       {
         // set position for writing
         BaseT::setCursor(x, y);
@@ -130,6 +137,8 @@ namespace Devices
           BaseT::setOrientation(flip, flip, false, true);
         }
       }
+
+      CanvasT& getCanvas() { return canvas_; }
       
     private:
       void writeCmd(const uint8_t cmd, const uint8_t * const cmdParams = nullptr, const size_t numParams = 0)
@@ -154,6 +163,8 @@ namespace Devices
           spi.transfer(nullptr, reinterpret_cast<const std::byte*>(&data[iData]), sizeof(uint8_t));
         }
       }
+    private:
+      CanvasT canvas_;
   };
 }
 
