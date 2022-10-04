@@ -42,7 +42,7 @@ namespace Devices
         std::array<int, NumCalibrationPoints> xOffsets{};
         std::array<int, NumCalibrationPoints> yOffsets{};
 
-        auto& canvas = touch_.getCanvas();
+        auto& canvas = display_.getCanvas();
         using CanvasT = std::remove_reference_t<decltype(canvas)>;
         for(size_t iPoint = 0; iPoint < NumCalibrationPoints; ++iPoint)
         {
@@ -50,7 +50,7 @@ namespace Devices
           ///@todo change with filled rectangle
           canvas.clear(EmbeddedGfx::Colors::Black);
           // draw the point on the screen
-          EmbeddedGfx::Circle point{xCoordinates[iPoint], yCoordinates[iPoint], pointRadius};
+          EmbeddedGfx::Circle<CanvasT> point{xCoordinates[iPoint], yCoordinates[iPoint], pointRadius};
           canvas.draw(point);
           // wait for touch
           auto touchCoordinates = touch_.getCoordinates();
@@ -70,7 +70,7 @@ namespace Devices
         auto xOffsetAvg = std::accumulate(xOffsets.cbegin(), xOffsets.cend(), 0) / NumCalibrationPoints;
         auto yOffsetAvg = std::accumulate(yOffsets.cbegin(), yOffsets.cend(), 0) / NumCalibrationPoints;
         // give the offsets to the touch
-        // touch_.setCalibration(xOffsetAvg, yOffsetAvg);
+        touch_.setCalibration(xOffsetAvg, yOffsetAvg);
       }
     private:
       TouchT& touch_;

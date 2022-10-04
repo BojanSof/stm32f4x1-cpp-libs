@@ -15,6 +15,7 @@
 #include <TftLcdGpio.hpp>
 #endif
 #include <Touch.hpp>
+#include <TouchCalibration.hpp>
 
 #include <EmbeddedGfx/Circle.hpp>
 #include <EmbeddedGfx/Triangle.hpp>
@@ -99,6 +100,11 @@ int main()
   Text<100, Font<6, 8>, CanvasT> text{"LCD T E S T !!!", {10, 20}};
   text.setColor(Colors::White);
   canvas.draw(text);
+  
+  // Calibrate touch screen
+  using TouchCalibrationT = Devices::TouchCalibration<Touch, TftDisplay>;
+  TouchCalibrationT calibration{touch, lcd};
+  calibration.calibrate();
   
   while(true)
   {

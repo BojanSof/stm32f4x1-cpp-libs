@@ -90,6 +90,9 @@ namespace Devices
         writeCmd(MemoryAccessControl, &param, sizeof(param));
       }
 
+      static constexpr size_t getWidth() { return Width; }
+      static constexpr size_t getHeight() { return Height; }
+
     protected:
       void writeCmd(const uint8_t cmd, const uint8_t * const cmdParams = nullptr, const size_t numParams = 0)
       {
