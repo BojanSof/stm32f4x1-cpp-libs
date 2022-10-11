@@ -12,8 +12,6 @@ target_include_directories(TinyusbCdc
 
 target_link_libraries(TinyusbCdc
   PUBLIC
-    ${CMSIS_LIBRARY}
-    ${HAL_LIBRARY}
     Tinyusb
 )
 
