@@ -1,6 +1,8 @@
 project(Tinyusb LANGUAGES C ASM)
 
-add_library(Tinyusb)
+add_library(Tinyusb
+  INTERFACE  
+)
 
 set_target_properties(Tinyusb
   PROPERTIES
@@ -8,20 +10,20 @@ set_target_properties(Tinyusb
 )
 
 target_include_directories(Tinyusb
-  PUBLIC
+  INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${CMAKE_CURRENT_LIST_DIR}"
 )
 
 target_sources(Tinyusb
-  PRIVATE
+  INTERFACE
     "src/tusb.c"
     "src/class/cdc/cdc_device.c"
     "src/portable/synopsys/dwc2/dcd_dwc2.c"
 )
 
 target_link_libraries(Tinyusb
-  PRIVATE
+  INTERFACE
     ${CMSIS_LIBRARY}
     ${HAL_LIBRARY}
 )

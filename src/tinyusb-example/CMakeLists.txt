@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.18)
 
-target_sources(Tinyusb
-  PUBLIC
+add_library(TinyusbCdc
+  STATIC
     tusb_config.h
+)
+
+target_link_libraries(TinyusbCdc
+  PUBLIC
+    Tinyusb
 )
 
 set(TARGET "tinyusb-example")
@@ -23,7 +28,7 @@ target_compile_features(${TARGET}
 target_link_libraries(${TARGET}
   PUBLIC
     stm32f4x1-devices
-    Tinyusb
+    TinyusbCdc
 )
 
 stm32_generate_binary_file(${TARGET})
