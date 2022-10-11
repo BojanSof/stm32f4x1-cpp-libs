@@ -9,6 +9,9 @@ FetchContent_Declare(
   GIT_PROGRESS   TRUE
 )
 
-FetchContent_MakeAvailable(Tinyusb)
-write_file(${tinyusb_SOURCE_DIR}/CMakeLists.txt "include(${CMAKE_CURRENT_LIST_DIR}/tinyusb.cmake)")
-add_subdirectory(${tinyusb_SOURCE_DIR})
+FetchContent_GetProperties(Tinyusb)
+if(NOT Tinyusb_POPULATED)
+  FetchContent_Populate(Tinyusb)
+  write_file(${tinyusb_SOURCE_DIR}/CMakeLists.txt "include(${CMAKE_CURRENT_LIST_DIR}/tinyusb.cmake)")
+  add_subdirectory(${tinyusb_SOURCE_DIR})
+endif()
