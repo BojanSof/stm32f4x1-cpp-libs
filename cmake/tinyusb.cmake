@@ -9,7 +9,7 @@ set_target_properties(Tinyusb
 
 target_include_directories(Tinyusb
   PUBLIC
-    "${CMAKE_CURRENT_SOURCES}/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${CMAKE_CURRENT_LIST_DIR}"
 )
 
