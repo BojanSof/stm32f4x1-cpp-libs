@@ -5,8 +5,15 @@ add_library(TinyusbCdc
     tusb_config.h
 )
 
+target_include_directories(TinyusbCdc
+  PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
+)
+
 target_link_libraries(TinyusbCdc
   PUBLIC
+    ${CMSIS_LIBRARY}
+    ${HAL_LIBRARY}
     Tinyusb
 )
 

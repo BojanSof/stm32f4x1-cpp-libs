@@ -1,3 +1,4 @@
+#include <stm32f4xx.h>
 #include <STM32F4x1/Clock.hpp>
 #include <tusb.h>
 
@@ -7,7 +8,7 @@ int main()
   using namespace Stm32;
   deviceInit();
   // enalbe USB clock
-  RCC->AHB2ENR |= RCC_AHB2ENR_OTGFS_EN;
+  RCC->AHB2ENR |= RCC_AHB2ENR_OTGFSEN;
   // configure USB
   USB_OTG_FS->GCCFG |= USB_OTG_GCCFG_NOVBUSSENS;
   USB_OTG_FS->GCCFG &= ~USB_OTG_GCCFG_VBUSBSEN;
