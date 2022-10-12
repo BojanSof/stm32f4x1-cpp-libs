@@ -46,11 +46,24 @@ namespace Devices
         using CanvasT = std::remove_reference_t<decltype(canvas)>;
         for(size_t iPoint = 0; iPoint < NumCalibrationPoints; ++iPoint)
         {
-          // clear the whole screen
-          ///@todo change with filled rectangle
-          canvas.clear(EmbeddedGfx::Colors::Black);
+          // clear the previous point
+          if(iPoint > 0)
+          {
+            EmbeddedGfx::Circle<CanvasT> point{
+                static_cast<float>(xCoordinates[iPoint - 1])
+              , static_cast<float>(yCoordinates[iPoint - 1])
+              , pointRadius};
+            point.setOutlineColor(EmbeddedGfx::Colors::Black);
+            point.setFillColor(EmbeddedGfx::Colors::Black);
+            canvas.draw(point);
+          }
           // draw the point on the screen
-          EmbeddedGfx::Circle<CanvasT> point{xCoordinates[iPoint], yCoordinates[iPoint], pointRadius};
+          EmbeddedGfx::Circle<CanvasT> point{
+              static_cast<float>(xCoordinates[iPoint])
+            , static_cast<float>(yCoordinates[iPoint])
+            , pointRadius};
+          point.setOutlineColor(EmbeddedGfx::Colors::White);
+          point.setFillColor(EmbeddedGfx::Colors::White);
           canvas.draw(point);
           // wait for touch
           auto touchCoordinates = touch_.getCoordinates();
@@ -65,7 +78,13 @@ namespace Devices
           xOffsets[iPoint] = xCoordinates[iPoint] - xTouch;
           yOffsets[iPoint] = yCoordinates[iPoint] - yTouch;
         }
-        canvas.clear(EmbeddedGfx::Colors::Black);
+        EmbeddedGfx::Circle<CanvasT> point{
+            static_cast<float>(xCoordinates[NumCalibrationPoints - 1])
+          , static_cast<float>(yCoordinates[NumCalibrationPoints - 1])
+          , pointRadius};
+        point.setOutlineColor(EmbeddedGfx::Colors::Black);
+        point.setFillColor(EmbeddedGfx::Colors::Black);
+        canvas.draw(point);
         // calculate the average of the offsets
         auto xOffsetAvg = std::accumulate(xOffsets.cbegin(), xOffsets.cend(), 0) / NumCalibrationPoints;
         auto yOffsetAvg = std::accumulate(yOffsets.cbegin(), yOffsets.cend(), 0) / NumCalibrationPoints;

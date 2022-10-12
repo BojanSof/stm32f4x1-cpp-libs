@@ -18,6 +18,7 @@
 #include <TouchCalibration.hpp>
 
 #include <EmbeddedGfx/Circle.hpp>
+#include <EmbeddedGfx/Rectangle.hpp>
 #include <EmbeddedGfx/Triangle.hpp>
 #include <EmbeddedGfx/Text.hpp>
 
@@ -116,6 +117,11 @@ int main()
       std::sprintf(buf, "X: %04d, Y: %04d, Z: %04d", x, y, z);
       Text<100, Font<6, 8>, CanvasT> text{buf, {10, 0}};
       text.setColor(Colors::White);
+      // clear the upper portion of the screen
+      Rectangle<CanvasT> rectangle{0, 0, width, 8};
+      rectangle.setOutlineColor(Colors::Black);
+      rectangle.setFillColor(Colors::Black);
+      canvas.draw(rectangle);
       canvas.draw(text);
       canvas.setPixel(x, y, Colors::White);
     }
