@@ -48,7 +48,11 @@ namespace Devices
         auto& spi = SpiInterfaceT::getInstance();
         using ConfigPins = SpiPins<MosiPinT, MisoPinT, SckPinT, CsPinT>;
         using Config = SpiConfig<
-            20000000ul       //< SCK freq
+#ifdef NDEBUG
+            20000000ul       //< SCK freq        
+#else
+            2000000ul        //< SCK freq
+#endif
           , SpiMode::Mode0   //< SPI mode
           , false            //< 8-bit frame size
           , false            //< send MSB first

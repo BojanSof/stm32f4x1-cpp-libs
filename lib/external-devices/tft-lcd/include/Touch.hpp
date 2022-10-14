@@ -116,15 +116,15 @@ namespace Devices
         }
       }
 
-      void setCalibration(const CoordinatesT xOffset, const CoordinatesT yOffset)
+      void setCalibration(const std::make_signed_t<CoordinatesT> xOffset, const std::make_signed_t<CoordinatesT> yOffset)
       {
-        xOffset_ = (xOffset > Width) ? xOffset_ : xOffset;
-        yOffset_ = (yOffset > Height) ? yOffset_ : yOffset;
+        xOffset_ = (xOffset > Width || xOffset < -Width) ? xOffset_ : xOffset;
+        yOffset_ = (yOffset > Height || yOffset < -Height) ? yOffset_ : yOffset;
       }
 
     private:
-      CoordinatesT xOffset_ = {};
-      CoordinatesT yOffset_ = {};
+      std::make_signed_t<CoordinatesT> xOffset_ = {};
+      std::make_signed_t<CoordinatesT> yOffset_ = {};
       bool flipX_ = false;
       bool flipY_ = false;
       // commands

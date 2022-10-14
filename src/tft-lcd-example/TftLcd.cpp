@@ -1,5 +1,5 @@
 #define SPI_DISPLAY 1  //< 1 to use SPI interface, 0 for GPIO interface, corresponding to display type
-
+#define TOUCH_CALIBRATION 1 //< 1 to enable calibration, 0 to disable
 #include <cstdio>
 #include <chrono>
 #include <type_traits>
@@ -15,7 +15,10 @@
 #include <TftLcdGpio.hpp>
 #endif
 #include <Touch.hpp>
+
+#if TOUCH_CALIBRATION == 1
 #include <TouchCalibration.hpp>
+#endif
 
 #include <EmbeddedGfx/Circle.hpp>
 #include <EmbeddedGfx/Rectangle.hpp>
@@ -101,11 +104,12 @@ int main()
   Text<100, Font<6, 8>, CanvasT> text{"LCD T E S T !!!", {10, 20}};
   text.setColor(Colors::White);
   canvas.draw(text);
-  
+#if TOUCH_CALIBRATION == 1
   // Calibrate touch screen
   using TouchCalibrationT = Devices::TouchCalibration<Touch, TftDisplay>;
   TouchCalibrationT calibration{touch, lcd};
   calibration.calibrate();
+#endif
   
   while(true)
   {

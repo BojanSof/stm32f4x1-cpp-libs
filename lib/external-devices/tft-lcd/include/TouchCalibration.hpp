@@ -27,8 +27,8 @@ namespace Devices
                     display_.getWidth()/4
                   , 3*display_.getWidth()/4
                   , display_.getWidth()/2
-                  , display_.getWidth()/4
                   , 3*display_.getWidth()/4
+                  , display_.getWidth()/4
                 };
         static constexpr size_t yCoordinates[] = {
                     display_.getHeight()/4
@@ -37,10 +37,12 @@ namespace Devices
                   , display_.getHeight()/4
                   , 3*display_.getHeight()/4
                 };
-        static constexpr float pointRadius = 20.0f;
+        static constexpr float pointRadius = 5.0f;
         // arrays which hold the offsets
         std::array<int, NumCalibrationPoints> xOffsets{};
         std::array<int, NumCalibrationPoints> yOffsets{};
+
+        using namespace std::chrono_literals;
 
         auto& canvas = display_.getCanvas();
         using CanvasT = std::remove_reference_t<decltype(canvas)>;
@@ -53,7 +55,6 @@ namespace Devices
                 static_cast<float>(xCoordinates[iPoint - 1])
               , static_cast<float>(yCoordinates[iPoint - 1])
               , pointRadius};
-            point.setOutlineColor(EmbeddedGfx::Colors::Black);
             point.setFillColor(EmbeddedGfx::Colors::Black);
             canvas.draw(point);
           }
@@ -62,9 +63,10 @@ namespace Devices
               static_cast<float>(xCoordinates[iPoint])
             , static_cast<float>(yCoordinates[iPoint])
             , pointRadius};
-          point.setOutlineColor(EmbeddedGfx::Colors::White);
           point.setFillColor(EmbeddedGfx::Colors::White);
           canvas.draw(point);
+          // some delay
+          Stm32::CycleCounter::delay(500ms);
           // wait for touch
           auto touchCoordinates = touch_.getCoordinates();
           while(!touchCoordinates.has_value())
@@ -82,7 +84,6 @@ namespace Devices
             static_cast<float>(xCoordinates[NumCalibrationPoints - 1])
           , static_cast<float>(yCoordinates[NumCalibrationPoints - 1])
           , pointRadius};
-        point.setOutlineColor(EmbeddedGfx::Colors::Black);
         point.setFillColor(EmbeddedGfx::Colors::Black);
         canvas.draw(point);
         // calculate the average of the offsets
@@ -90,6 +91,8 @@ namespace Devices
         auto yOffsetAvg = std::accumulate(yOffsets.cbegin(), yOffsets.cend(), 0) / NumCalibrationPoints;
         // give the offsets to the touch
         touch_.setCalibration(xOffsetAvg, yOffsetAvg);
+        // some delay
+        Stm32::CycleCounter::delay(500ms);
       }
     private:
       TouchT& touch_;
