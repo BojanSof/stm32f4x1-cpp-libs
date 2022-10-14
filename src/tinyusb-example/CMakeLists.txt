@@ -22,7 +22,7 @@ target_sources(${TARGET}
   PRIVATE
     msc-disk.c
     usb-descriptors.c
-    CdcExample.cpp
+    MscExample.cpp
 )
 
 target_compile_features(${TARGET}
