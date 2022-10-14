@@ -32,5 +32,10 @@ elseif(DEVICE STREQUAL "STM32F411CE")
   set(CMSIS_LIBRARY CMSIS::STM32::F411CE)
 endif()
 
+# add preprocessor definitions
+add_compile_definitions(
+  DEVICE=${DEVICE}
+)
+
 add_subdirectory(lib)
 add_subdirectory(src)

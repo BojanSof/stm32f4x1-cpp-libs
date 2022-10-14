@@ -130,7 +130,7 @@ namespace Devices
 
       static constexpr uint8_t height_ = 64;
       static constexpr uint8_t width_ = 128;
-      using CanvasT = EmbeddedGfx::BufferedCanvas<width_, height_, EmbeddedGfx::CanvasType::Page, EmbeddedGfx::ColorType::BlackAndWhite>;
+      using CanvasT = EmbeddedGfx::BufferedCanvas<width_, height_, EmbeddedGfx::CanvasType::Page, EmbeddedGfx::BlackAndWhite>;
       CanvasT& getCanvas() { return canvas_; }
 
     private:
