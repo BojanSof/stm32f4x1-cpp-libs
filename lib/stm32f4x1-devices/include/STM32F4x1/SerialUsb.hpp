@@ -1,7 +1,12 @@
 #ifndef STM32_SERIAL_USB_HPP
 #define STM32_SERIAL_USB_HPP
 
+#include <algorithm>
 #include <chrono>
+#include <cstddef>
+
+#include <tusb.h>
+
 #include "STM32F4x1/Gpio.hpp"
 #include "STM32F4x1/CycleCounter.hpp"
 
@@ -19,7 +24,7 @@ namespace Stm32
        * 
        * @return SerialUsb& The SerialUsb instance
        */
-      SerialUsb& getInstance();
+      static SerialUsb& getInstance();
 
       /**
        * @brief Read requested number of bytes
@@ -35,7 +40,7 @@ namespace Stm32
       {
         std::byte* const iBegin = buffer;
         std::byte* const iEnd = buffer + size;
-        std::byte* iCursor = iBegin;
+        std::byte* iCursor = buffer;
 
         const auto startTime = CycleCounter::now();
         while((iCursor < iEnd) && ((CycleCounter::now() - startTime) < timeout))
@@ -48,7 +53,7 @@ namespace Stm32
           }
           else
           {
-            iCursor += static_cast<size_t>(tud_cdc_read(iCursor, std::min(iEnd - iCursor, availableCount)));
+            iCursor += static_cast<size_t>(tud_cdc_read(iCursor, std::min(static_cast<size_t>(iEnd - iCursor), availableCount)));
           }
         }
         return static_cast<size_t>(iCursor - iBegin);

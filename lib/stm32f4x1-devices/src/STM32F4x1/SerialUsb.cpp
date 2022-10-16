@@ -1,5 +1,4 @@
 #include "STM32F4x1/SerialUsb.hpp"
-#include <tusb.h>
 
 namespace Stm32
 {
