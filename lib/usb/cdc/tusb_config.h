@@ -27,7 +27,7 @@
 #define _TUSB_CONFIG_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 //--------------------------------------------------------------------+
@@ -69,7 +69,11 @@
 #endif
 
 #ifndef CFG_TUSB_DEBUG
+#ifdef NDEBUG
 #define CFG_TUSB_DEBUG        0
+#else
+#define CFG_TUSB_DEBUG        1
+#endif
 #endif
 
 // Enable Device stack
@@ -115,11 +119,8 @@
 // CDC Endpoint transfer buffer size, more is faster
 #define CFG_TUD_CDC_EP_BUFSIZE   (TUD_OPT_HIGH_SPEED ? 512 : 64)
 
-// MSC Buffer size of Device Mass storage
-#define CFG_TUD_MSC_EP_BUFSIZE   512
-
 #ifdef __cplusplus
- }
+}
 #endif
 
 #endif /* _TUSB_CONFIG_H_ */

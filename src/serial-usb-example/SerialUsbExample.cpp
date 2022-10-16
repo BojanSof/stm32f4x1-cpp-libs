@@ -9,12 +9,15 @@ int main()
 
   decltype(auto) serial = SerialUsb::getInstance();
   
-  const char msg[] = "Serial Test";
+  const char msg[] = "Serial Test\r\n";
   const auto msgLen = sizeof(msg) - 1;
 
   while(true)
   {
-    serial.write(reinterpret_cast<const std::byte*>(msg), msgLen, 1s);
+    if(serial.connected())
+    {
+      serial.write(reinterpret_cast<const std::byte*>(msg), msgLen, 1s);
+    }
     serial.update();
     CycleCounter::delay(500ms);
   }

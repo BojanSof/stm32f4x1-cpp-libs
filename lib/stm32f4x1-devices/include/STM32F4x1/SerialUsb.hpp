@@ -38,6 +38,8 @@ namespace Stm32
       template< class Rep, class Period >
       size_t read(std::byte* buffer, const size_t size, const std::chrono::duration<Rep, Period>& timeout)
       {
+        if(!connected()) return 0;
+
         std::byte* const iBegin = buffer;
         std::byte* const iEnd = buffer + size;
         std::byte* iCursor = buffer;
@@ -71,6 +73,8 @@ namespace Stm32
       template< class Rep, class Period >
       size_t write(const std::byte* const buffer, const size_t size, const std::chrono::duration<Rep, Period>& timeout)
       {
+        if(!connected()) return 0;
+        
         const std::byte* const iBegin = buffer;
         const std::byte* const iEnd = iBegin + size;
         const std::byte* iCursor = buffer;
@@ -107,6 +111,18 @@ namespace Stm32
       void update()
       {
         tud_task();
+      }
+
+      /**
+       * @brief Check if communication channel is
+       * opened
+       * 
+       * @return true Device is connected
+       * @return false Device is not connected
+       */
+      bool connected()
+      {
+        return tud_cdc_connected();
       }
     private:
       SerialUsb();
