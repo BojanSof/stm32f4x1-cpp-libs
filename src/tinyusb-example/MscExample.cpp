@@ -31,7 +31,7 @@ int main()
   idPin.setSpeed(GpioSpeed::High);
   idPin.setAlternateFunction(Pins::PA10::AlternateFunctions::OTG_FS_ID);
 
-  // enalbe USB clock
+  // enable USB clock
   RCC->AHB2ENR |= RCC_AHB2ENR_OTGFSEN;
   // configure USB
   USB_OTG_FS->GCCFG |= USB_OTG_GCCFG_NOVBUSSENS;
