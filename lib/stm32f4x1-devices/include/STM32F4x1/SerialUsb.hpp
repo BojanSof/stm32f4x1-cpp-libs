@@ -36,7 +36,7 @@ namespace Stm32
        * @return size_t The number of bytes that was read
        */
       template< class Rep, class Period >
-      size_t read(std::byte* buffer, const size_t size, const std::chrono::duration<Rep, Period>& timeout)
+      size_t read(std::byte* const buffer, const size_t size, const std::chrono::duration<Rep, Period>& timeout)
       {
         if(!connected()) return 0;
 
@@ -56,6 +56,43 @@ namespace Stm32
           else
           {
             iCursor += static_cast<size_t>(tud_cdc_read(iCursor, std::min(static_cast<size_t>(iEnd - iCursor), availableCount)));
+          }
+        }
+        return static_cast<size_t>(iCursor - iBegin);
+      }
+
+      template< class Rep, class Period >
+      size_t read(std::byte* const buffer, const size_t bufSize
+                , const std::byte* const expectedBytes, const size_t expectedSize
+                , const std::chrono::duration<Rep, Period>& timeout)
+      {
+        if(!connected()) return 0;
+
+        std::byte* const iBegin = buffer;
+        std::byte* const iEnd = iBegin + bufSize;
+        std::byte* iCursor = iBegin;
+        size_t iExpected = 0;
+
+        const auto startTime = CycleCounter::now();
+        while((iExpected < expectedSize)
+            && (iCursor < iEnd)
+            && ((CycleCounter::now() - startTime) < timeout))
+        {
+          size_t availableCount = std::min(static_cast<size_t>(iEnd-iCursor), getNumberAvailableBytes());
+          // update USB stack if no data is available for reading
+          if(availableCount == 0)
+          {
+            update();
+          }
+          else
+          {
+            int readChar = -1;
+            while (availableCount-- && ((readChar = tud_cdc_read_char()) >= 0))
+            {
+              std::byte readByte = static_cast<std::byte>(readChar);
+              *iCursor++ = readByte;
+              iExpected = (readByte == expectedBytes[iExpected]) ? ++iExpected : 0;
+            }
           }
         }
         return static_cast<size_t>(iCursor - iBegin);
