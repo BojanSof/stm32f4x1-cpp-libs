@@ -91,7 +91,7 @@ namespace Stm32
             {
               std::byte readByte = static_cast<std::byte>(readChar);
               *iCursor++ = readByte;
-              iExpected = (readByte == expectedBytes[iExpected]) ? ++iExpected : 0;
+              iExpected = (readByte == expectedBytes[iExpected]) ? (iExpected + 1) : 0;
             }
           }
         }

@@ -16,6 +16,7 @@ target_compile_features(${TARGET}
 target_link_libraries(${TARGET}
   PUBLIC
     stm32f4x1-devices
+    cfsm-generator
 )
 
 stm32_generate_binary_file(${TARGET})
