@@ -36,6 +36,7 @@ class GuessNumberFsm
       , serial_{serial}
     {
       num = 12345;
+      processEvent(GreetEvent{});
     }
 
     void run()
