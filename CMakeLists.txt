@@ -13,29 +13,31 @@ list(APPEND CMAKE_MODULE_PATH
 
 option(STM32F4X1_GENERATE_FLASH_TARGETS "Add JLink and ST-link flash targets" ON)
 
+# add preprocessor definitions
+add_compile_definitions(
+  DEVICE=${DEVICE}
+)
+
 # fetch CMSIS
 stm32_fetch_cmsis(F4)
 # fetch HAL
 # stm32_fetch_hal(F4)
 
 find_package(CMSIS COMPONENTS ${DEVICE} REQUIRED)
-# find_package(HAL COMPONENTS STM32F4 REQUIRED)
+# find_package(HAL COMPONENTS ${DEVICE} REQUIRED)
 
-# fetch additional libraries
-find_package(FsmGenerator REQUIRED)
-find_package(EmbeddedGfx REQUIRED)
-
-# set cmsis library for linking based on device
+# set cmsis and hal library for linking based on device
 if(DEVICE STREQUAL "STM32F401CC")
   set(CMSIS_LIBRARY CMSIS::STM32::F401CC)
 elseif(DEVICE STREQUAL "STM32F411CE")
   set(CMSIS_LIBRARY CMSIS::STM32::F411CE)
 endif()
+# set(HAL_LIBRARY HAL::STM32::F4)
 
-# add preprocessor definitions
-add_compile_definitions(
-  DEVICE=${DEVICE}
-)
+# fetch additional libraries
+find_package(TinyUsb REQUIRED)
+find_package(FsmGenerator REQUIRED)
+find_package(EmbeddedGfx REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(src)

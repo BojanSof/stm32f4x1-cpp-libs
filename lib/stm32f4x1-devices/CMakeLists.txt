@@ -15,12 +15,14 @@ target_sources(${TARGET}
     "include/STM32F4x1/ComInterface.hpp"
     "include/STM32F4x1/I2C.hpp"
     "include/STM32F4x1/SPI.hpp"
+    "include/STM32F4x1/SerialUsb.hpp"
   PRIVATE
     "src/STM32F4x1/Clock.cpp"
     "src/STM32F4x1/GeneralPurposeTimer.cpp"
     "src/STM32F4x1/ExternalInterruptController.cpp"
     "src/STM32F4x1/I2C.cpp"
     "src/STM32F4x1/SPI.cpp"
+    "src/STM32F4x1/SerialUsb.cpp"
 )
 
 target_include_directories(${TARGET}
@@ -39,4 +41,5 @@ target_link_libraries(${TARGET}
     ${CMSIS_LIBRARY}
     STM32::NoSys
     STM32::Nano
+    TinyUsbCdc
 )

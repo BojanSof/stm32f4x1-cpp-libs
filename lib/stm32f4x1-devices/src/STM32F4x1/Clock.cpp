@@ -18,6 +18,7 @@ namespace Stm32
     RCC->PLLCFGR |= 25 << RCC_PLLCFGR_PLLM_Pos;   // PLL divisor = 25
     RCC->PLLCFGR |= 336 << RCC_PLLCFGR_PLLN_Pos;  // PLL multiplier = 336
     RCC->PLLCFGR |= 0x1 << RCC_PLLCFGR_PLLP_Pos;  // PLL output divisor = 4
+    RCC->PLLCFGR |= 7 << RCC_PLLCFGR_PLLQ_Pos;    // PLL divisor for 48 MHz clock output
     RCC->CR |= RCC_CR_PLLON;                      // Enabling PLL
     while(!(RCC->CR & RCC_CR_PLLRDY));            // Wait until PLL gets locked
 
