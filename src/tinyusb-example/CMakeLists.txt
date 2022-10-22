@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-add_library(TinyUsbMscExample
-  STATIC
-    tusb_config.h
-)
+add_library(TinyUsbMscExample STATIC)
 
 target_include_directories(TinyUsbMscExample
   PUBLIC
@@ -15,14 +12,20 @@ target_link_libraries(TinyUsbMscExample
     TinyUsb
 )
 
+target_sources(TinyUsbMscExample
+  PUBLIC
+    "tusb_config.h"
+  PRIVATE
+    "usb-descriptors.c"
+    "msc-disk.c"
+)
+
 set(TARGET "tinyusb-example")
 
 add_executable(${TARGET})
 target_sources(${TARGET}
   PRIVATE
-    msc-disk.c
-    usb-descriptors.c
-    MscExample.cpp
+    "MscExample.cpp"
 )
 
 target_compile_features(${TARGET}
