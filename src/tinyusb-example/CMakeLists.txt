@@ -35,8 +35,8 @@ target_compile_features(${TARGET}
 
 target_link_libraries(${TARGET}
   PUBLIC
+    TinyUsbMscExample  # must be before stm32f4x1-devices
     stm32f4x1-devices
-    TinyUsbMscExample
 )
 
 stm32_generate_binary_file(${TARGET})
