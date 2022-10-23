@@ -4,7 +4,7 @@ This repository contains peripherals library for STM32F4 BlackPill boards, which
 Besides the peripherals library, there are libraries for few external devices, such as OLED and TFT-LCD displays, touch controller, shift-registers, ultrasonic sensor and much more.
 The code is written in C++, following the C++17 standard. The [Arm GNU Toolchain](https://developer.arm.com/Tools%20and%20Software/GNU%20Toolchain) is used with [CMake](https://cmake.org/) for creating [Ninja](https://ninja-build.org/) build system.
 [Visual Studio Code](https://code.visualstudio.com/) is the code editor of preference and debug configurations are included for it.
-Currently, there is support for [JLink](https://www.segger.com/downloads/jlink/) and [ST-link V2](https://www.st.com/en/development-tools/st-link-v2.html) (including chinese dongles) debuggers which can be used for flashing and debugging the code via SWD.
+Currently, there is support for [JLink](https://www.segger.com/downloads/jlink/) and [ST-link V2](https://www.st.com/en/development-tools/st-link-v2.html) (including Chinese dongles) debuggers, which can be used for flashing and debugging the code via SWD.
 
 The main purpose of this project is to learn how to use modern C++ in bare-metal programming.
 
@@ -17,11 +17,11 @@ The main purpose of this project is to learn how to use modern C++ in bare-metal
   - [C/C++ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack)
   - [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)
 
-For flashing and debugging, following options are currently provided:
+For flashing and debugging, the following options are currently provided:
 - [JLink](https://www.segger.com/downloads/jlink/)
 - [ST-link V2](https://www.st.com/en/development-tools/st-link-v2.html). On Linux, [stlink](https://github.com/stlink-org/stlink) toolset can be used.
 
-The development was done on Linux, other platforms are not tested, but there shouldn't be dificulties when using other platforms.
+The development was done on Linux, other platforms are not tested, but there shouldn't be difficulties when using other platforms.
 
 ## Current state of the project
 
@@ -83,7 +83,7 @@ There are few basic examples that are using the developed interfaces for testing
 
 ## Resources and related projects
 
-The following resources are great insipartion for this project:
+The following resources are great inspiration for this project:
 
 1. [stm32-cmake](https://github.com/ObKo/stm32-cmake) - the CMake part for STM32 development is taken from this repo, with minor additions and adjustments
 2. [EmbeddedGfx](https://github.com/nikodinovska/EmbeddedGfx) - graphics library developed and used for display interfaces
