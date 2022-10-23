@@ -1,3 +1,14 @@
+# Fetch FreeRTOS
+FetchContent_Declare(
+  freertos
+  GIT_REPOSITORY            "https://github.com/freertos/freertos.git"
+  GIT_TAG                   "202112.00"
+  GIT_SUBMODULES_RECURSE    TRUE
+  GIT_SHALLOW               TRUE
+)
+FetchContent_MakeAvailable(freertos)
+set(FREERTOS_PATH "${freertos_SOURCE_DIR}")
+
 # For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
 set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM3_MPU ARM_CM4_MPU ARM_CM4F ARM_CM7 ARM_CM7_MPU ARM_CM23 ARM_CM23_NTZ ARM_CM33 ARM_CM33_NTZ)
 set(FreeRTOS_armv8_PORTS ARM_CM23_NTZ ARM_CM33_NTZ ARM_CM23 ARM_CM33)
