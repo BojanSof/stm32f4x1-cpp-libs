@@ -17,9 +17,9 @@ void task1(void* param)
   while(true)
   {
     ledPin.setLevel(true);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(300));
     ledPin.setLevel(false);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(300));
   }
 }
 
@@ -32,9 +32,9 @@ void task2(void* param)
   while(true)
   {
     ledPin.setLevel(false);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(800));
     ledPin.setLevel(true);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(800));
   }
 }
 
