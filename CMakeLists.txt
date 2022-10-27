@@ -25,6 +25,7 @@ stm32_fetch_cmsis(F4)
 
 find_package(CMSIS COMPONENTS ${DEVICE} REQUIRED)
 # find_package(HAL COMPONENTS ${DEVICE} REQUIRED)
+find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
 
 # set cmsis and hal library for linking based on device
 if(DEVICE STREQUAL "STM32F401CC")

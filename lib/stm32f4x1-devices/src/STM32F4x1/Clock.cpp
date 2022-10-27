@@ -1,6 +1,7 @@
 #include <stm32f4xx.h>
 #include "STM32F4x1/Clock.hpp"
 
+extern uint32_t SystemCoreClock;  //< used in FreeRTOS
 
 namespace Stm32
 {
@@ -26,6 +27,8 @@ namespace Stm32
     while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);  // Wait until main clock source is switched
     RCC->CR &= ~(RCC_CR_HSION);                   // Disabling internal oscillator
     while(RCC->CR & RCC_CR_HSIRDY);               // Wait until HSI is disabled
+
+    SystemCoreClock = CoreFrequency;              // Set the new clock value
 
     // Enable Cycle Counter, which is used as a steady clock and also for delays
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
