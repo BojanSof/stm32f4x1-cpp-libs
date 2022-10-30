@@ -16,6 +16,7 @@ target_sources(${TARGET}
     "include/STM32F4x1/I2C.hpp"
     "include/STM32F4x1/SPI.hpp"
     "include/STM32F4x1/SerialUsb.hpp"
+    "include/STM32F4x1/RealTimeClock.hpp"
   PRIVATE
     "src/STM32F4x1/Clock.cpp"
     "src/STM32F4x1/GeneralPurposeTimer.cpp"
@@ -23,6 +24,7 @@ target_sources(${TARGET}
     "src/STM32F4x1/I2C.cpp"
     "src/STM32F4x1/SPI.cpp"
     "src/STM32F4x1/SerialUsb.cpp"
+    "src/STM32F4x1/RealTimeClock.cpp"
 )
 
 target_include_directories(${TARGET}
