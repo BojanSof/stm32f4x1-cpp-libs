@@ -58,8 +58,8 @@ namespace Stm32
       static time_point now() noexcept
       {
         // read date and time registers
-        const uint32_t datereg = RTC->DR;
         const uint32_t timereg = RTC->TR;
+        const uint32_t datereg = RTC->DR;  //< reading TR locks DR value
         // store the time info
         std::tm timeinfo{};
         timeinfo.tm_wday = ((datereg & RTC_DR_WDU) >> RTC_DR_WDU_Pos) % 7;
