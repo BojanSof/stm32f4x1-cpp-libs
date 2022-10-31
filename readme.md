@@ -32,6 +32,7 @@ STM32 peripherals:
 - **SPI master** asynchronous driver
 - **Serial USB**
 - **Cycle counter**
+- **Real time clock** (missing subsecond precision)
 
 External devices:
 - **SSD1306 OLED display**
@@ -71,7 +72,6 @@ There are few basic examples that are using the developed interfaces for testing
 ## Future development
 
 - Interfaces for other peripherals, including:
-  - RTC
   - ADC
   - DMA
 - Improving communication class hierarchy, including:
