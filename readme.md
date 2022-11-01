@@ -20,6 +20,7 @@ The main purpose of this project is to learn how to use modern C++ in bare-metal
 For flashing and debugging, the following options are currently provided:
 - [JLink](https://www.segger.com/downloads/jlink/)
 - [ST-link V2](https://www.st.com/en/development-tools/st-link-v2.html). On Linux, [stlink](https://github.com/stlink-org/stlink) toolset can be used.
+- `CMSIS-DAPLink` debug probe, with [OpenOCD](https://openocd.org/) as software interface for the probe. The probe used in the project can easily be bought from China, very cheaply. For Linux, `udev` rules file is provided under `templates/udev-rules` directory, which can be adjusted based on the USB VID and PID of the debug probe. Additional modifications on the `openocd.cfg` file may also be needed, found inside `cmake/stm32` directory.
 
 The development was done on Linux, other platforms are not tested, but there shouldn't be difficulties when using other platforms.
 
