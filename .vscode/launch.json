@@ -27,6 +27,21 @@
       "runToEntryPoint": "main"
     },
     {
+      "name": "STM32F401 Cortex Debug CMSIS-DAPLink",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "servertype": "openocd",
+      "configFiles": [
+        "${workspaceFolder}/cmake/stm32/openocd.cfg"
+      ],
+      "device": "STM32F401CC",
+      "interface": "swd",
+      "svdFile": "${workspaceFolder}/svd/STM32F401.svd",
+      "runToEntryPoint": "main"
+    },
+    {
       "name": "STM32F411 Cortex Debug ST-link",
       "type": "cortex-debug",
       "request": "launch",
@@ -46,6 +61,21 @@
       "cwd": "${workspaceFolder}",
       "executable": "${command:cmake.launchTargetPath}",
       "servertype": "jlink",
+      "device": "STM32F411CE",
+      "interface": "swd",
+      "svdFile": "${workspaceFolder}/svd/STM32F411.svd",
+      "runToEntryPoint": "main"
+    },
+    {
+      "name": "STM32F411 Cortex Debug CMSIS-DAPLink",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "servertype": "openocd",
+      "configFiles": [
+        "${workspaceFolder}/cmake/stm32/openocd.cfg"
+      ],
       "device": "STM32F411CE",
       "interface": "swd",
       "svdFile": "${workspaceFolder}/svd/STM32F411.svd",

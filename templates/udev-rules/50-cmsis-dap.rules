@@ -1,0 +1,2 @@
+# c251:f001 CMSIS DAPLink
+SUBSYSTEM=="usb", ATTR{idVendor}=="c251", ATTR{idProduct}=="f001", MODE:="666"
